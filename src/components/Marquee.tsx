@@ -15,6 +15,7 @@ function Group({ hidden = false }: { hidden?: boolean }) {
 export function Marquee() {
   return (
     <div className="marquee">
+      <div className="marquee__bg" aria-hidden="true" />
       <div className="marquee__track">
         <Group />
         <Group hidden />

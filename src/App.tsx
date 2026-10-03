@@ -4,7 +4,7 @@ import { Grain } from "@/components/Grain";
 import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { Passes } from "@/components/Passes";
-import { Proshow } from "@/components/Proshow";
+import { Timeline } from "@/components/Timeline";
 import { SideNav } from "@/components/SideNav";
 import { TopBar } from "@/components/TopBar";
 
@@ -20,7 +20,7 @@ export default function App() {
         <Marquee />
         <Events />
         <Passes />
-        <Proshow />
+        <Timeline />
       </main>
 
       <Footer />

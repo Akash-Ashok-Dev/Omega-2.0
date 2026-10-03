@@ -2,7 +2,11 @@ import { HERO, HERO_IMAGE } from "@/data/site";
 
 export function Hero() {
   return (
-    <section id="home" className="hero" style={{ backgroundImage: `url("${HERO_IMAGE}")` }}>
+    <section
+      id="home"
+      className="hero"
+      style={{ backgroundImage: `url("${HERO_IMAGE}")` }}
+    >
       <div className="hero-content">
         <p className="eyebrow">{HERO.eyebrow}</p>
         <h1>

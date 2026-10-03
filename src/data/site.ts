@@ -4,7 +4,7 @@ export type NavItem = {
   label: string;
 };
 
-export type SectionId = "home" | "events" | "passes" | "proshow";
+export type SectionId = "home" | "events" | "passes" | "timeline";
 
 export type FestEvent = {
   id: string;
@@ -20,6 +20,12 @@ export type Pass = {
   kind: string;
   title: string;
   description: string;
+};
+
+export type Pass_type = {
+  id: string;
+  kind: string;
+  title: string;
   price: string;
 };
 
@@ -27,126 +33,123 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: "home", index: "01", label: "HOME" },
   { id: "events", index: "02", label: "EVENTS" },
   { id: "passes", index: "03", label: "PASSES" },
-  { id: "proshow", index: "04", label: "PROSHOW" },
+  { id: "timeline", index: "04", label: "TIMELINE" },
 ] as const;
 
 export const HERO = {
-  eyebrow: "Annual Techno-Cultural Festival",
-  title: "NEXUS",
-  titleAccent: "UNBOUND",
+  eyebrow: "OMEGA 2.0 — Robotics Fest",
+  title: "OMEGA",
+  titleAccent: "2.0",
   blurb:
-    "Three days of technology, culture, machines, ideas, music, competition, and conversations that shape what comes next.",
-  dates: "OCT 16—18 / KOCHI, INDIA",
+    "Three days of gears, wires, code, and combustion. Build bots, break records, and send sparks flying.",
+  dates: "DEC 4—5 / MEC, KOCHI, INDIA",
   status: "SYSTEM ONLINE",
 } as const;
 
 export const MARQUEE_WORDS = [
-  "INNOVATE",
-  "BUILD",
-  "COMPETE",
-  "CREATE",
-  "EXPERIENCE",
-  "NEXUS '26",
+  "OPTIMUS PRIME",
+  "BUMBLEBEE",
+  "MEGATRON",
+  "GRIMLOCK",
+  "THE NEXT COULD BE YOURS",
+  "OMEGA 2.0",
 ] as const;
 
 export const EVENTS: readonly FestEvent[] = [
   {
-    id: "workshops",
-    tag: "TECHNICAL",
-    title: "Workshops",
+    id: "line-follower",
+    tag: "AUTONOMOUS",
+    title: "Line Follower",
     description:
-      "Hands-on sessions on AI, robotics, web development, design, cybersecurity, and more.",
+      "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery.",
     large: true,
     image:
-      "https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1581091215367-59ab6b1e8d83?auto=format&fit=crop&w=1400&q=85",
   },
   {
-    id: "robowars",
-    tag: "BATTLE",
-    title: "Robowars",
-    description: "Steel, sparks, strategy.",
+    id: "mazesolver",
+    tag: "PATHFINDING",
+    title: "Maze Solver",
+    description: "Shortest path. Tight turns. Pure algorithmic brute force.",
     image:
-      "https://images.unsplash.com/photo-1561144257-e32e8efc6c4f?auto=format&fit=crop&w=900&q=85",
-  },
-  {
-    id: "gameverse",
-    tag: "GAMING",
-    title: "Gameverse",
-    description: "Take the arena. Own the leaderboard.",
-    image:
-      "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=85",
-  },
-  {
-    id: "proshows",
-    tag: "CULTURAL",
-    title: "Proshows",
-    description:
-      "Live music, performers, visual spectacle, and a crowd that refuses to stand still.",
-    large: true,
-    image:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1400&q=85",
-  },
-  {
-    id: "conclave",
-    tag: "SPEAKERS",
-    title: "Conclave",
-    description: "Ideas from people building tomorrow.",
-    image:
-      "https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1609358904803-534b24cf30eb?auto=format&fit=crop&w=900&q=85",
   },
 ] as const;
 
 export const PASSES: readonly Pass[] = [
   {
-    id: "day-01",
-    kind: "NEXUS '26 / ADMIT ONE",
-    title: "Day 01",
-    description: "Events, competitions, conclave",
-    price: "₹399",
+    id: "Line Follower",
+    kind: "OMEGA 2.0 / Line Follower",
+    title: "Line Follower",
+    description: "Robotics workshops, prelims & arena time",
   },
   {
-    id: "day-02",
-    kind: "NEXUS '26 / ADMIT ONE",
-    title: "Day 02",
-    description: "Workshops, gaming, proshow",
-    price: "₹599",
-  },
-  {
-    id: "day-03",
-    kind: "NEXUS '26 / ADMIT ONE",
-    title: "Day 03",
-    description: "Finals, showcase, proshow",
-    price: "₹799",
-  },
-  {
-    id: "full-fest",
-    kind: "NEXUS '26 / ALL ACCESS",
-    title: "Full Fest",
-    description: "Every day. Every moment.",
-    price: "₹1,499",
+    id: "Micro Mouse",
+    kind: "OMEGA 2.0 / Micro Mouse",
+    title: "Micro Mouse",
+    description: "Combats, maze runs & tech expos",
   },
 ] as const;
 
-export const PROSHOW = {
-  eyebrow: "The main stage / October 18",
-  titleLines: ["Feel the", "frequency."] as const,
+export const PASSES_TYPE: readonly Pass_type[] = [
+  {
+    id: "Line Follower",
+    kind: "OMEGA 2.0 / RAS",
+    title: "RAS",
+    price: "₹999",
+  },
+  {
+    id: "Micro Mouse",
+    kind: "OMEGA 2.0/ IEEE",
+    title: "IEEE",
+    price: "₹1499",
+  },
+  {
+    id: "day-03",
+    kind: "OMEGA 2.0 / Non-IEEE",
+    title: "Non-IEEE",
+    price: "₹1799",
+  },
+] as const;
+
+
+export const TIMELINE = {
+  eyebrow: "FIELD LOG / OMEGA 2.0",
+  title: "Follow the line.",
   blurb:
-    "When the sun goes down, NEXUS turns into a massive live-music playground featuring headline artists, DJ sets, visual installations, and thousands of voices in sync.",
-  details: [
-    { label: "VENUE", value: "Main Arena" },
-    { label: "GATES", value: "06:00 PM" },
-    { label: "ENTRY", value: "Festival Pass Required" },
-  ] as const,
+    "Two days. One course. Keep your bot on the bright line and hit every checkpoint before the final flag.",
+  days: [
+    {
+      label: "DAY 01",
+      date: "DEC 4",
+      checkpoints: [
+        { time: "09:00", title: "Registration starts", detail: "Teams check in and collect their bot tags." },
+        { time: "10:30", title: "Line follower competition starts", detail: "The first run enters the arena." },
+        { time: "16:30", title: "Qualifiers end", detail: "Fastest clean runs move to the next day." },
+        { time: "18:00", title: "Day 01 closes", detail: "Power down, recalibrate, come back sharper." },
+      ],
+    },
+    {
+      label: "DAY 02",
+      date: "DEC 5",
+      checkpoints: [
+        { time: "09:30", title: "Pit lane opens", detail: "Final checks, repairs, and route briefing." },
+        { time: "11:00", title: "Line follower finals start", detail: "The remaining bots take the hard route." },
+        { time: "15:30", title: "Finals end", detail: "The last lap decides the podium." },
+        { time: "17:00", title: "Day 02 closes", detail: "Awards, photos, and one last victory lap." },
+      ],
+    },
+  ],
 } as const;
 
-export const PROSHOW_IMAGE =
-  "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=2000&q=85";
+export const TIMELINE_IMAGE =
+  "https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=2000&q=85";
 
 export const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=2000&q=85";
+  "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=2000&q=85";
 
 export const FOOTER = {
-  titleLines: ["See you", "in the future."] as const,
-  note: "© 2026 NEXUS FESTIVAL · Built for curious minds.",
-  contactEmail: "hello@nexusfest.in",
+  titleLines: ["Weld. Wire.", "Roll out."] as const,
+  note: "© 2026 OMEGA 2.0 · Built for tinkerers & circuit breakers.",
+  contactEmail: "hello@omega2k.in",
 } as const;

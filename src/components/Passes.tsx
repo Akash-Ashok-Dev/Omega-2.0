@@ -1,4 +1,4 @@
-import { PASSES } from "@/data/site";
+import { PASSES, PASSES_TYPE } from "@/data/site";
 import { Reveal } from "@/components/Reveal";
 import { SectionHead } from "@/components/SectionHead";
 
@@ -12,21 +12,35 @@ export function Passes() {
         aside="One badge. A festival-sized experience."
       />
 
-      <div className="pass-grid">
+      <div className="timeline">
         {PASSES.map((pass) => (
           <Reveal as="article" key={pass.id} className="pass">
             <small>{pass.kind}</small>
 
-            <div>
-              <h3>{pass.title}</h3>
-              <p>{pass.description}</p>
-            </div>
+            <p>{pass.description}</p>
 
-            <div className="pass__footer">
-              <span className="price">{pass.price}</span>
-              <a className="pass__buy" href="#passes" aria-label={`Buy ${pass.title} pass`}>
-                BUY ↗
-              </a>
+            <div className="pass-grid">
+              <h3>{pass.title}</h3>
+              {PASSES_TYPE.map((pass) => (
+                <Reveal as="article" key={pass.id} className="pass">
+                  <small>{pass.kind}</small>
+
+                  <div>
+                    <h3>{pass.title}</h3>
+                  </div>
+
+                  <div className="pass__footer">
+                    <span className="price">{pass.price}</span>
+                    <a
+                      className="pass__buy"
+                      href="#passes"
+                      aria-label={`Buy ${pass.title} pass`}
+                    >
+                      BUY ↗
+                    </a>
+                  </div>
+                </Reveal>
+              ))}
             </div>
           </Reveal>
         ))}
