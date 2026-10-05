@@ -7,7 +7,7 @@ export function SideNav() {
   return (
     <aside className="side-nav">
       <a className="brand" href="#home">
-        NX&apos;26
+        Ω&apos;26
       </a>
 
       <nav className="nav-links" aria-label="Section navigation">
