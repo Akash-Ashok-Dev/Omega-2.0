@@ -81,17 +81,13 @@ export function Timeline() {
               >
                 <path d="M50 0 C10 100 90 180 50 280 S10 460 50 560 S90 740 50 840 S20 960 50 1000" />
               </svg>
-              <div
+              <img
                 className="timeline-track__bot"
+                src="/Timeline Bot.png"
+                alt=""
                 style={robotPosition(clamp(scrollProgress * 2 - dayIndex))}
                 aria-hidden="true"
-              >
-                <span className="bot__antenna" />
-                <span className="bot__light" />
-                <span className="bot__sensor" />
-                <span className="bot__wheel bot__wheel--left" />
-                <span className="bot__wheel bot__wheel--right" />
-              </div>
+              />
               {day.checkpoints.map((checkpoint, checkpointIndex) => (
                 <div className="checkpoint" key={checkpoint.title}>
                   <span className="checkpoint__dot" aria-hidden="true" />

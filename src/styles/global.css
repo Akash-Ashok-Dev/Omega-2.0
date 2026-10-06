@@ -713,81 +713,13 @@ section {
   position: absolute;
   top: var(--bot-top, 3%);
   left: var(--bot-left, 50%);
-  width: 68px;
-  height: 50px;
+  width: 94px;
+  height: 94px;
   transform: translate(-50%, -50%) rotate(var(--bot-angle, 0deg));
-  background: #d9e3e0;
-  border: 3px solid #111;
-  border-radius: 8px 8px 12px 12px;
-  box-shadow: 5px 5px 0 var(--lime), inset 0 -8px 0 #889492;
+  object-fit: contain;
   z-index: 2;
   transition: top 0.12s linear, left 0.12s linear;
 }
-
-.timeline-track__bot::before {
-  content: "";
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  width: 3px;
-  height: 13px;
-  transform: translateX(-50%);
-  background: #111;
-}
-
-.timeline-track__bot::after {
-  content: "";
-  position: absolute;
-  top: -19px;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  transform: translateX(-50%);
-  background: var(--lime);
-  border: 2px solid #111;
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--lime);
-}
-
-  .bot__light {
-    position: absolute;
-    top: 10px;
-    left: 15px;
-    width: 10px;
-    height: 10px;
-    background: var(--lime);
-    border: 2px solid #111;
-    border-radius: 50%;
-    box-shadow: 20px 0 0 -2px #ff5c1a, 20px 0 0 0 #111;
-  }
-
-  .bot__sensor {
-    position: absolute;
-    bottom: -8px;
-    left: 18px;
-    width: 28px;
-    height: 8px;
-    background: #111;
-    border: 2px solid var(--lime);
-    border-radius: 2px;
-  }
-
-  .bot__wheel {
-    position: absolute;
-    bottom: 5px;
-    width: 9px;
-    height: 24px;
-    background: #111;
-    border: 2px solid #56605e;
-    border-radius: 4px;
-  }
-
-  .bot__wheel--left { left: -9px; }
-  .bot__wheel--right { right: -9px; }
-
-  .bot__antenna {
-    display: block;
-  }
 
 .checkpoint {
   position: relative;
