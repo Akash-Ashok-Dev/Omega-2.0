@@ -142,11 +142,9 @@ export const TIMELINE = {
   ],
 } as const;
 
-export const TIMELINE_IMAGE =
-  "https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=2000&q=85";
+export const TIMELINE_IMAGE = "/MicroMouse.jpg";
 
-export const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=2000&q=85";
+export const HERO_IMAGE = "/Hero Cover.jpg";
 
 export const FOOTER = {
   titleLines: ["Autobots!", "Roll out."] as const,
