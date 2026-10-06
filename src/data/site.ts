@@ -63,16 +63,14 @@ export const EVENTS: readonly FestEvent[] = [
     description:
       "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery.",
     large: true,
-    image:
-      "https://images.unsplash.com/photo-1581091215367-59ab6b1e8d83?auto=format&fit=crop&w=1400&q=85",
+    image: "/MicroMouse.jpg",
   },
   {
     id: "mazesolver",
     tag: "PATHFINDING",
     title: "Maze Solver",
     description: "Shortest path. Tight turns. Pure algorithmic brute force.",
-    image:
-      "https://images.unsplash.com/photo-1609358904803-534b24cf30eb?auto=format&fit=crop&w=900&q=85",
+    image: "/LIne follower .jpg",
   },
 ] as const;
 
