@@ -146,6 +146,76 @@ export const HERO_IMAGE = "/Hero Cover.jpg";
 
 export const FOOTER = {
   titleLines: ["Autobots!", "Roll out."] as const,
-  note: "© 2026 OMEGA 2.0 · Built for tinkerers & circuit breakers.",
+  note: "© 2026 OMEGA 2.0 · Built by Akash Ashok.",
   contactEmail: "hello@omega2k.in",
+} as const;
+
+export type TeamMember = {
+  name: string;
+  role: string;
+  focus: string;
+  email: string;
+  phone: string;
+};
+
+export const TEAM: readonly TeamMember[] = [
+  {
+    name: "Aarav Menon",
+    role: "Festival Director",
+    focus: "Overall ops, sponsors, and stage",
+    email: "aarav@omega2k.in",
+    phone: "+91 98470 11223",
+  },
+  {
+    name: "Diya Krishnan",
+    role: "Robotics Lead",
+    focus: "Robowars, line follower, micromouse",
+    email: "diya@omega2k.in",
+    phone: "+91 98470 44556",
+  },
+  {
+    name: "Rohan Pillai",
+    role: "Tech & Workshops",
+    focus: "Hack tracks, dev tooling, labs",
+    email: "rohan@omega2k.in",
+    phone: "+91 98470 77889",
+  },
+  {
+    name: "Meera Nair",
+    role: "Design & Creative",
+    focus: "Posters, motion, merch, web",
+    email: "meera@omega2k.in",
+    phone: "+91 98470 22334",
+  },
+  {
+    name: "Kabir Sethi",
+    role: "Sponsorship Head",
+    focus: "Partners, booths, and swag",
+    email: "kabir@omega2k.in",
+    phone: "+91 98470 55667",
+  },
+  {
+    name: "Ananya Rao",
+    role: "Volunteer Coordinator",
+    focus: "Crew, registrations, helpdesk",
+    email: "ananya@omega2k.in",
+    phone: "+91 98470 88990",
+  },
+] as const;
+
+export const CONTACT = {
+  windowTitle: "omega://contact-team",
+  blurb:
+    "Reach the humans behind OMEGA 2.0. Mail any of us directly, or ping the shared desk — we reply within a day.",
+  desk: {
+    email: "hello@omega2k.in",
+    phone: "+91 98470 00000",
+    hours: "Mon–Sat / 10:00–18:00 IST",
+    venue: "CS Dept, Kochi, India",
+  },
+  socials: [
+    { label: "INSTAGRAM", href: "https://instagram.com" },
+    { label: "DISCORD", href: "https://discord.com" },
+    { label: "GITHUB", href: "https://github.com" },
+  ],
 } as const;
