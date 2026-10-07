@@ -154,53 +154,52 @@ export const FOOTER = {
 export type TeamMember = {
   name: string;
   role: string;
-  focus: string;
   email: string;
   phone: string;
 };
 
 export const TEAM: readonly TeamMember[] = [
   {
-    name: "Ethan",
-    role: "Event Lead",
-    focus: "Overall ops, sponsors, and stage",
-    email: "aarav@omega2k.in",
-    phone: "+91 98470 11223",
+    name: "Aarjith",
+    role: "RAS Chair",
+    email: "rohan@omega2k.in",
+    phone: "+91 89214 55932",
   },
   {
     name: "Anan",
     role: "Event Lead",
-    focus: "Robowars, line follower, micromouse",
     email: "diya@omega2k.in",
-    phone: "+91 98470 44556",
+    phone: "+91 80757 77821",
   },
   {
-    name: "Aarjith",
-    role: "Tech & Workshops",
-    focus: "Hack tracks, dev tooling, labs",
-    email: "rohan@omega2k.in",
-    phone: "+91 98470 77889",
-  },
-  {
-    name: "Sreehari",
-    role: "Design & Creative",
-    focus: "Posters, motion, merch, web",
+    name: "Srihari",
+    role: "Tech Lead",
     email: "meera@omega2k.in",
-    phone: "+91 98470 22334",
+    phone: "+91 95358 68056",
+  },
+  {
+    name: "Sreesanker",
+    role: "Design & Creative",
+    email: "meera@omega2k.in",
+    phone: "+91 94966 41475",
+  },
+  {
+    name: "Hrishidev",
+    role: "Event Lead",
+    email: "aarav@omega2k.in",
+    phone: "+91 79073 95973",
   },
   {
     name: "Fidha",
     role: "Publicity Head",
-    focus: "Partners, booths, and swag",
     email: "kabir@omega2k.in",
     phone: "+91 98470 55667",
   },
   {
     name: "Akash Ashok",
     role: "Web Lead",
-    focus: "Web",
-    email: "ananya@omega2k.in",
-    phone: "+91 98470 88990",
+    email: "akashashok3907@gmail.com",
+    phone: "+91 77363 95106",
   },
 ] as const;
 
