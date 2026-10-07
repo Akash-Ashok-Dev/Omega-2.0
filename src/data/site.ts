@@ -162,37 +162,37 @@ export const TEAM: readonly TeamMember[] = [
   {
     name: "Aarjith",
     role: "RAS Chair",
-    email: "rohan@omega2k.in",
+    email: "aarjithvj@gmail.com",
     phone: "+91 89214 55932",
   },
   {
     name: "Anan",
     role: "Event Lead",
-    email: "diya@omega2k.in",
+    email: "ananasad80@gmail.com",
     phone: "+91 80757 77821",
   },
   {
     name: "Srihari",
     role: "Tech Lead",
-    email: "meera@omega2k.in",
+    email: "sriharidileep2@gmail.com",
     phone: "+91 95358 68056",
   },
   {
     name: "Sreesanker",
     role: "Design & Creative",
-    email: "meera@omega2k.in",
+    email: "sreesankerg@gmail.com",
     phone: "+91 94966 41475",
   },
   {
     name: "Hrishidev",
     role: "Event Lead",
-    email: "aarav@omega2k.in",
+    email: "hrisidev2005@gmail.com",
     phone: "+91 79073 95973",
   },
   {
     name: "Fidha",
     role: "Publicity Head",
-    email: "kabir@omega2k.in",
+    email: "fidhafathimatj@gmail.com",
     phone: "+91 98470 55667",
   },
   {
@@ -209,9 +209,8 @@ export const CONTACT = {
     "Reach the humans behind OMEGA 2.0. Mail any of us directly, or ping the shared desk — we reply within a day.",
   desk: {
     email: "omegamec24@gmail.com",
-    phone: "+91 98470 00000",
     hours: "Mon–Sat / 10:00–18:00 IST",
-    venue: "CS Dept, Kochi, India",
+    venue: "MEC, Kochi, India",
   },
   socials: [
     { label: "INSTAGRAM", href: "https://www.instagram.com/ieee.omega.mec/.com" },
