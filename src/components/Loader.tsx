@@ -28,7 +28,7 @@ export function Loader() {
     >
       <div className="loader__ring">
         <div className="loader__core" />
-        <div className="loader__logo">Ω</div>
+        <img className="loader__logo" src="/Omega%20Logo.jpeg" alt="" />
       </div>
     </div>
   );

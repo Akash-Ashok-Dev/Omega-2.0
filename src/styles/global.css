@@ -1556,11 +1556,10 @@ a.win__desk-row:hover b {
 }
 
 .loader__logo {
-  font-family: "Anton", sans-serif;
-  font-weight: 800;
-  font-size: 2.2rem;
-  color: #fff;
-  text-shadow: 2px 2px 0 var(--lime);
+  display: block;
+  width: 54px;
+  height: 76px;
+  object-fit: contain;
   z-index: 1;
 }
 
