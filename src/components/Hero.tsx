@@ -9,6 +9,11 @@ export function Hero() {
     >
       <div className="hero-content">
         <p className="eyebrow">{HERO.eyebrow}</p>
+        <img
+          className="hero__title-cover"
+          src="/Autobots Logo.jpg"
+          alt="Autobots emblem"
+        />
         <h1>
           {HERO.title} <span>{HERO.titleAccent}</span>
         </h1>
