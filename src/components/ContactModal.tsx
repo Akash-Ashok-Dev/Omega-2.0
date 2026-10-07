@@ -104,7 +104,9 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
 
         <div className="win__addr">
           <span className="win__proto">🔒</span>
-          <span className="win__url">omega2k.in/contact?window=team</span>
+          <span className="win__url">
+            https://omega2mec.vercel.app/contact?window=team
+          </span>
           <span className="win__badge">6 CREW ONLINE</span>
         </div>
 

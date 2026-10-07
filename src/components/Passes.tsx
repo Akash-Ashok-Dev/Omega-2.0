@@ -6,7 +6,7 @@ export function Passes() {
   return (
     <section id="passes" className="passes">
       <SectionHead
-        index="03 / ACCESS"
+        index="03 / REGISTER"
         accent="orange"
         titleLines={["Choose your", "pass"]}
         aside="One badge. A festival-sized experience."
@@ -26,7 +26,9 @@ export function Passes() {
                   <small>{pass.kind}</small>
 
                   <div>
+                    <span className="pass__member">FOR</span>
                     <h3>{pass.title}</h3>
+                    <span className="pass__member">member</span>
                   </div>
 
                   <div className="pass__footer">

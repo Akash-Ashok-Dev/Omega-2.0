@@ -91,6 +91,12 @@ section[id] {
   appearance: none;
 }
 
+.button--register {
+  min-width: 210px;
+  padding: 21px 30px;
+  font-size: 0.9rem;
+}
+
 .button:hover {
   background: #111;
   color: var(--lime);
@@ -566,6 +572,13 @@ section {
   margin: 12px 0;
   color: #fff;
   text-shadow: 3px 3px 0 var(--lime);
+}
+
+.pass__member {
+  display: block;
+  font: 1.35rem / 1 "Anton", sans-serif;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .pass p {

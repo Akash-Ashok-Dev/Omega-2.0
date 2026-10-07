@@ -16,8 +16,8 @@ export function Hero() {
 
       <div className="hero-bottom">
         <p>{HERO.blurb}</p>
-        <a className="button" href="#events">
-          EXPLORE THE FEST <strong aria-hidden="true">↓</strong>
+        <a className="button button--register" href="#events">
+          REGISTER <strong aria-hidden="true">↓</strong>
         </a>
       </div>
     </section>
