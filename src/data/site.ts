@@ -219,3 +219,33 @@ export const CONTACT = {
     { label: "WHATSAPP", href: "https://whatsapp.com/channel/0029VbDPraS4inon0RDhAd3P" },
   ],
 } as const;
+
+export type Rulebook = {
+  id: string;
+  tag: string;
+  title: string;
+  description: string;
+  driveUrl: string;
+  fileName: string;
+};
+
+export const RULES: readonly Rulebook[] = [
+  {
+    id: "line-follower",
+    tag: "RULEBOOK / 01",
+    title: "Line Follower",
+    description:
+      "Track specs, sensors, controller limits, lane rules, and how penalties are applied.",
+    driveUrl: "https://drive.google.com/file/d/YOUR_LINE_FOLLOWER_FILE_ID/view",
+    fileName: "Line_Follower_RuleBook.pdf",
+  },
+  {
+    id: "micromouse",
+    tag: "RULEBOOK / 02",
+    title: "Micromouse",
+    description:
+      "Maze dimensions, maze-solving rules, time limits, scoring, and disqualifiers.",
+    driveUrl: "https://drive.google.com/file/d/YOUR_MICROMOUSE_FILE_ID/view",
+    fileName: "Micromouse_RuleBook.pdf",
+  },
+] as const;

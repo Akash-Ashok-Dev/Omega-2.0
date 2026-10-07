@@ -5,6 +5,7 @@ import { Hero } from "@/components/Hero";
 import { Loader } from "@/components/Loader";
 import { Marquee } from "@/components/Marquee";
 import { Passes } from "@/components/Passes";
+import { Rules } from "@/components/Rules";
 import { Timeline } from "@/components/Timeline";
 import { SideNav } from "@/components/SideNav";
 import { TopBar } from "@/components/TopBar";
@@ -23,6 +24,7 @@ export default function App() {
         <Events />
         <Passes />
         <Timeline />
+        <Rules />
       </main>
 
       <Footer />
