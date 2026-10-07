@@ -143,10 +143,19 @@ footer {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: "Anton", sans-serif;
   font-size: 1.5rem;
   letter-spacing: 1px;
   transition: color 0.2s;
+}
+
+.brand__logo {
+  width: 38px;
+  height: 52px;
+  object-fit: contain;
 }
 
 .brand:hover {

@@ -7,7 +7,7 @@ export function SideNav() {
   return (
     <aside className="side-nav">
       <a className="brand" href="#home">
-        Ω&apos;26
+        <img className="brand__logo" src="/Omega%20Logo.jpeg" alt="Omega 26" />
       </a>
 
       <nav className="nav-links" aria-label="Section navigation">
