@@ -4,7 +4,7 @@ export type NavItem = {
   label: string;
 };
 
-export type SectionId = "home" | "events" | "passes" | "timeline";
+export type SectionId = "home" | "events" | "passes" | "timeline" | "rules";
 
 export type FestEvent = {
   id: string;
@@ -34,6 +34,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: "events", index: "02", label: "EVENTS" },
   { id: "passes", index: "03", label: "PASSES" },
   { id: "timeline", index: "04", label: "TIMELINE" },
+  { id: "rules", index: "05", label: "RULES" },
 ] as const;
 
 export const HERO = {

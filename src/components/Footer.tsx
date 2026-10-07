@@ -8,7 +8,7 @@ export function Footer() {
 
   return (
     <>
-      <footer className="footer">
+      <footer id="contact" className="footer">
         <div>
           <h2>
             {FOOTER.titleLines.map((line) => (

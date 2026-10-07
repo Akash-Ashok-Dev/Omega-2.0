@@ -22,6 +22,10 @@ export function SideNav() {
             <span className="nav-link__label">/ {item.label}</span>
           </a>
         ))}
+        <a className="nav-link" href="#contact">
+          <span className="nav-link__index">06</span>
+          <span className="nav-link__label">/ MEET TEAM</span>
+        </a>
       </nav>
 
       <div className="year">
