@@ -1758,6 +1758,53 @@ a.win__desk-row:hover b {
   box-shadow: 6px 6px 0 #5a0000;
 }
 
+.rules-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(11, 11, 11, 0.78);
+}
+
+.rules-modal__window {
+  position: relative;
+  width: min(440px, 100%);
+  padding: 34px;
+  background: #111;
+  color: var(--text);
+  border: 3px solid #fff;
+  box-shadow: 8px 8px 0 var(--lime);
+}
+
+.rules-modal__window h2 {
+  margin: 18px 0 10px;
+  font: clamp(2.3rem, 7vw, 4.5rem) / 0.9 "Anton", sans-serif;
+  text-transform: uppercase;
+}
+
+.rules-modal__window > p:last-child {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.rules-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: 1.8rem/1 "DM Mono", monospace;
+  cursor: pointer;
+}
+
+.rules-modal__close:hover {
+  color: var(--lime);
+}
+
 .rule__file {
   margin-top: 14px;
   font: 0.66rem/1 "DM Mono", monospace;
