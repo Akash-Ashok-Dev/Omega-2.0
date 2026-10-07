@@ -16,7 +16,12 @@ export function Hero() {
 
       <div className="hero-bottom">
         <p>{HERO.blurb}</p>
-        <a className="button button--register" href="#events">
+        <a
+          className="button button--register"
+          href="https://example.com/omega-26/register"
+          target="_blank"
+          rel="noreferrer"
+        >
           REGISTER <strong aria-hidden="true">↓</strong>
         </a>
       </div>

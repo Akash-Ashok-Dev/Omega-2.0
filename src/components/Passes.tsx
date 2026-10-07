@@ -33,6 +33,7 @@ export function Passes() {
 
                   <div className="pass__footer">
                     <span className="price">{pass.price}</span>
+                    {/*
                     <a
                       className="pass__buy"
                       href="#passes"
@@ -40,6 +41,7 @@ export function Passes() {
                     >
                       BUY ↗
                     </a>
+                    */}
                   </div>
                 </Reveal>
               ))}
