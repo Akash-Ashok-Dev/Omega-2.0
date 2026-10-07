@@ -196,7 +196,7 @@ footer {
   justify-content: space-between;
   gap: 16px;
   padding: 22px 34px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 0;
   font: 0.75rem/1 "DM Mono", monospace;
   position: relative;
   z-index: 2;
@@ -253,6 +253,8 @@ footer {
   overflow: hidden;
   background-position: center;
   background-size: cover;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 160px);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 160px);
 }
 
 .hero::before {
