@@ -43,7 +43,7 @@ export const HERO = {
   titleAccent: "2.0",
   blurb:
     "Three days of gears, wires, code, and combustion. Build bots, break records, and send sparks flying.",
-  dates: "DEC 4—5 / MEC, KOCHI, INDIA",
+  dates: "COMING SOON... / MEC, KOCHI, INDIA",
   status: "SYSTEM ONLINE",
 } as const;
 
