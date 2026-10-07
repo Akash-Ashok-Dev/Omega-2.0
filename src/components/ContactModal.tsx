@@ -121,10 +121,6 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
                 <span>MAIL</span>
                 <b>{CONTACT.desk.email}</b>
               </a>
-              <a className="win__desk-row" href={`tel:${CONTACT.desk.phone}`}>
-                <span>CALL</span>
-                <b>{CONTACT.desk.phone}</b>
-              </a>
               <div className="win__desk-row">
                 <span>HOURS</span>
                 <b>{CONTACT.desk.hours}</b>
@@ -174,7 +170,6 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
                       <h3>{member.name}</h3>
                     </div>
                     <div className="crew__role">{member.role}</div>
-                    <p className="crew__focus">{member.focus}</p>
 
                     <div className="crew__links">
                       <a href={`mailto:${member.email}`}>{member.email}</a>
