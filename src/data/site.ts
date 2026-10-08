@@ -42,7 +42,7 @@ export const HERO = {
   title: "OMEGA",
   titleAccent: "2.0",
   blurb:
-    "Three days of gears, wires, code, and combustion. Build bots, break records, and send sparks flying.",
+    "Two days of gears, wires, code, and combustion. Build bots, break records, and send sparks flying.",
   dates: "COMING SOON... / MEC, KOCHI, INDIA",
   status: "SYSTEM ONLINE",
 } as const;
