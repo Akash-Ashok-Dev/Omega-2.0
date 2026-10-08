@@ -95,19 +95,19 @@ export const PASSES_TYPE: readonly Pass_type[] = [
     id: "Line Follower",
     kind: "OMEGA 2.0 / RAS",
     title: "RAS",
-    price: "₹999",
+    price: "REVEALING SOON",
   },
   {
     id: "Maze Solver",
     kind: "OMEGA 2.0/ IEEE",
     title: "IEEE",
-    price: "₹1499",
+    price: "REVEALING SOON",
   },
   {
     id: "day-03",
     kind: "OMEGA 2.0 / Non-IEEE",
     title: "Non-IEEE",
-    price: "₹1799",
+    price: "REVEALING SOON",
   },
 ] as const;
 
