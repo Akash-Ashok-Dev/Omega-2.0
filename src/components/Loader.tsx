@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const COUNTDOWN_SECONDS = 5;
+const COUNTDOWN_SECONDS = 10;
 const LOGO_DELAY = 900;
 const FADE_MS = 700;
 
