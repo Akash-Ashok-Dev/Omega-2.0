@@ -292,10 +292,11 @@ footer {
 .hero h1 {
   font-family: "Anton", sans-serif;
   font-size: clamp(3.5rem, 15vw, 15rem);
-  line-height: 0.78;
+  line-height: 0.85;
   margin: 24px 0;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
+  text-shadow: 3px 3px 0 #5a0000, 5px 5px 0 var(--lime);
 }
 
 .hero h1 span {

@@ -1,30 +1,43 @@
+import { useState } from "react";
+
+import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { HERO, HERO_IMAGE } from "@/data/site";
 
 export function Hero() {
-  return (
-    <section
-      id="home"
-      className="hero"
-      style={{ backgroundImage: `url("${HERO_IMAGE}")` }}
-    >
-      <div className="hero-content">
-        <p className="eyebrow">{HERO.eyebrow}</p>
-        <h1>
-          {HERO.title} <span>{HERO.titleAccent}</span>
-        </h1>
-      </div>
+  const [registrationOpen, setRegistrationOpen] = useState(false);
 
-      <div className="hero-bottom">
-        <p>{HERO.blurb}</p>
-        <a
-          className="button button--register"
-          href="https://example.com/omega-26/register"
-          target="_blank"
-          rel="noreferrer"
-        >
-          HEED THE CALL AND JOIN <strong aria-hidden="true">→</strong>
-        </a>
-      </div>
-    </section>
+  return (
+    <>
+      <section
+        id="home"
+        className="hero"
+        style={{ backgroundImage: `url("${HERO_IMAGE}")` }}
+      >
+        <div className="hero-content">
+          <p className="eyebrow">{HERO.eyebrow}</p>
+          <h1>
+            {HERO.title} <span>{HERO.titleAccent}</span>
+          </h1>
+        </div>
+
+        <div className="hero-bottom">
+          <p>{HERO.blurb}</p>
+          <button
+            className="button button--register"
+            type="button"
+            onClick={() => setRegistrationOpen(true)}
+          >
+            HEED THE CALL AND JOIN <strong aria-hidden="true">→</strong>
+          </button>
+        </div>
+      </section>
+
+      {registrationOpen ? (
+        <ComingSoonModal
+          message="Registration will be available soon."
+          onClose={() => setRegistrationOpen(false)}
+        />
+      ) : null}
+    </>
   );
 }

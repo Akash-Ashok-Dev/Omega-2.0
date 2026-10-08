@@ -88,6 +88,7 @@ export function Timeline() {
                 style={robotPosition(clamp(scrollProgress * 2 - dayIndex))}
                 aria-hidden="true"
               />
+              {/*
               {day.checkpoints.map((checkpoint, checkpointIndex) => (
                 <div className="checkpoint" key={checkpoint.title}>
                   <span className="checkpoint__dot" aria-hidden="true" />
@@ -95,6 +96,23 @@ export function Timeline() {
                     <span className="checkpoint__time">{checkpoint.time}</span>
                     <h4>{checkpoint.title}</h4>
                     <p>{checkpoint.detail}</p>
+                  </div>
+                  <span className="checkpoint__index">
+                    0{checkpointIndex + 1}
+                  </span>
+                </div>
+              ))}
+              */}
+              {day.checkpoints.map((checkpoint, checkpointIndex) => (
+                <div
+                  className="checkpoint"
+                  key={`${day.label}-${checkpoint.time}`}
+                >
+                  <span className="checkpoint__dot" aria-hidden="true" />
+                  <div className="checkpoint__card">
+                    <span className="checkpoint__time">{checkpoint.time}</span>
+                    <h4>COMING SOON</h4>
+                    <p>Event details will be announced soon.</p>
                   </div>
                   <span className="checkpoint__index">
                     0{checkpointIndex + 1}

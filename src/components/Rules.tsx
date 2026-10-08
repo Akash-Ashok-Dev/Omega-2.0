@@ -1,22 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
+import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { RULES } from "@/data/site";
 import { Reveal } from "@/components/Reveal";
 import { SectionHead } from "@/components/SectionHead";
 
 export function Rules() {
   const [selectedRule, setSelectedRule] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!selectedRule) return;
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedRule(null);
-    };
-
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [selectedRule]);
 
   return (
     <>
@@ -72,32 +62,10 @@ export function Rules() {
       </section>
 
       {selectedRule ? (
-        <div
-          className="rules-modal"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelectedRule(null);
-          }}
-        >
-          <div
-            className="rules-modal__window"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="rules-modal-title"
-          >
-            <button
-              className="rules-modal__close"
-              type="button"
-              onClick={() => setSelectedRule(null)}
-              aria-label="Close rules notice"
-            >
-              ×
-            </button>
-            <p className="eyebrow">RULEBOOK STATUS</p>
-            <h2 id="rules-modal-title">Coming soon.</h2>
-            <p>{selectedRule} rules will be available soon.</p>
-          </div>
-        </div>
+        <ComingSoonModal
+          message={`${selectedRule} rules will be available soon.`}
+          onClose={() => setSelectedRule(null)}
+        />
       ) : null}
     </>
   );
