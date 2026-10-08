@@ -14,7 +14,6 @@ export function Hero() {
         style={{ backgroundImage: `url("${HERO_IMAGE}")` }}
       >
         <div className="hero-content">
-          <p className="eyebrow">{HERO.eyebrow}</p>
           <h1>
             {HERO.title} <span>{HERO.titleAccent}</span>
           </h1>
