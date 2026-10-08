@@ -64,7 +64,7 @@ export const EVENTS: readonly FestEvent[] = [
     description:
       "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery.",
     large: true,
-    image: "/MicroMouse.jpg",
+    image: "/MazeSolver.jpg",
   },
   {
     id: "mazesolver",
@@ -83,9 +83,9 @@ export const PASSES: readonly Pass[] = [
     description: "Robotics workshops, prelims & arena time",
   },
   {
-    id: "Micro Mouse",
-    kind: "OMEGA 2.0 / Micro Mouse",
-    title: "Micro Mouse",
+    id: "Maze Solver",
+    kind: "OMEGA 2.0 / Maze Solver",
+    title: "Maze Solver",
     description: "Combats, maze runs & tech expos",
   },
 ] as const;
@@ -98,7 +98,7 @@ export const PASSES_TYPE: readonly Pass_type[] = [
     price: "₹999",
   },
   {
-    id: "Micro Mouse",
+    id: "Maze Solver",
     kind: "OMEGA 2.0/ IEEE",
     title: "IEEE",
     price: "₹1499",
@@ -120,28 +120,30 @@ export const TIMELINE = {
   days: [
     {
       label: "DAY 01",
-      date: "DEC 4",
+      date: "Coming Soon...",
       checkpoints: [
         { time: "09:00", title: "Registration starts", detail: "Teams check in and collect their bot tags." },
         { time: "10:30", title: "Line follower competition starts", detail: "The first run enters the arena." },
-        { time: "16:30", title: "Qualifiers end", detail: "Fastest clean runs move to the next day." },
+        { time: "16:30", title: "Line follower competition ends", detail: "Fastest clean runs move to the next day." },
         { time: "18:00", title: "Day 01 closes", detail: "Power down, recalibrate, come back sharper." },
       ],
     },
     {
       label: "DAY 02",
-      date: "DEC 5",
+      date: "Coming Soon...",
       checkpoints: [
         { time: "09:30", title: "Pit lane opens", detail: "Final checks, repairs, and route briefing." },
-        { time: "11:00", title: "Line follower finals start", detail: "The remaining bots take the hard route." },
-        { time: "15:30", title: "Finals end", detail: "The last lap decides the podium." },
-        { time: "17:00", title: "Day 02 closes", detail: "Awards, photos, and one last victory lap." },
+        { time: "11:00", title: "Maze Solver starts", detail: "The remaining bots take the hard route." },
+        { time: "15:30", title: "Maze Solver Ends", detail: "The final maze run locks in the rankings." },
+        { time: "16:00", title: "Prize Distribution", detail: "Winners take the podium and collect their prizes." },
+        { time: "18:00", title: "Culturals", detail: "Music, movement, and a proper festival wind-down." },
+        { time: "19:30", title: "Day 02 closes", detail: "Awards, photos, and one last victory lap." },
       ],
     },
   ],
 } as const;
 
-export const TIMELINE_IMAGE = "/MicroMouse.jpg";
+export const TIMELINE_IMAGE = "/MazeSolver.jpg";
 
 export const HERO_IMAGE = "/Hero Cover.jpg";
 
@@ -179,13 +181,13 @@ export const TEAM: readonly TeamMember[] = [
   },
   {
     name: "Sreesanker",
-    role: "Design & Creative",
+    role: "Ambiance Lead",
     email: "sreesankerg@gmail.com",
     phone: "+91 94966 41475",
   },
   {
     name: "Hrishidev",
-    role: "Event Lead",
+    role: "Marketing Lead",
     email: "hrisidev2005@gmail.com",
     phone: "+91 79073 95973",
   },
@@ -239,12 +241,12 @@ export const RULES: readonly Rulebook[] = [
     fileName: "Line_Follower_RuleBook.pdf",
   },
   {
-    id: "micromouse",
+    id: "maze-solver",
     tag: "RULEBOOK / 02",
-    title: "Micromouse",
+    title: "Maze Solver",
     description:
       "Maze dimensions, maze-solving rules, time limits, scoring, and disqualifiers.",
-    driveUrl: "https://drive.google.com/file/d/YOUR_MICROMOUSE_FILE_ID/view",
-    fileName: "Micromouse_RuleBook.pdf",
+    driveUrl: "https://drive.google.com/file/d/YOUR_MAZE_SOLVER_FILE_ID/view",
+    fileName: "MazeSolver_RuleBook.pdf",
   },
 ] as const;

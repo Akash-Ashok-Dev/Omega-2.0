@@ -22,7 +22,7 @@ export function Hero() {
           target="_blank"
           rel="noreferrer"
         >
-          REGISTER <strong aria-hidden="true">↓</strong>
+          HEED THE CALL AND JOIN <strong aria-hidden="true">→</strong>
         </a>
       </div>
     </section>
