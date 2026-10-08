@@ -1534,6 +1534,13 @@ a.win__desk-row:hover b {
   pointer-events: none;
 }
 
+.loader__countdown {
+  color: var(--lime);
+  font: 3.5rem / 0.85 "Anton", sans-serif;
+  text-shadow: 6px 6px 0 #5a0000;
+  z-index: 1;
+}
+
 .loader__ring {
   width: 150px;
   height: 150px;
@@ -1562,20 +1569,6 @@ a.win__desk-row:hover b {
   border-left-color: #fff;
   border-radius: 50%;
   animation: loader-spin-reverse 2s linear infinite;
-}
-
-.loader__core {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 34px;
-  height: 34px;
-  transform: translate(-50%, -50%);
-  background: #d7263d;
-  border: 2px solid #111;
-  box-shadow: 4px 4px 0 #fff, 6px 6px 0 rgba(251, 61, 97, 0.25);
-  z-index: -1;
 }
 
 .loader__logo {

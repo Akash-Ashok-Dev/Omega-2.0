@@ -1,20 +1,36 @@
 import { useEffect, useState } from "react";
 
-const LOADER_DELAY = 1500;
+const COUNTDOWN_SECONDS = 5;
+const LOGO_DELAY = 900;
 const FADE_MS = 700;
 
 export function Loader() {
   const [phase, setPhase] = useState<"on" | "exiting" | "gone">("on");
+  const [countdown, setCountdown] = useState<number | null>(COUNTDOWN_SECONDS);
 
   useEffect(() => {
-    const fade = window.setTimeout(() => setPhase("exiting"), LOADER_DELAY);
+    let fade: number | undefined;
+
+    const countdownTimer = window.setInterval(() => {
+      setCountdown((current) => {
+        if (current === null || current <= 1) {
+          window.clearInterval(countdownTimer);
+          fade = window.setTimeout(() => setPhase("exiting"), LOGO_DELAY);
+          return null;
+        }
+
+        return current - 1;
+      });
+    }, 1000);
+
     const done = window.setTimeout(
       () => setPhase("gone"),
-      LOADER_DELAY + FADE_MS,
+      COUNTDOWN_SECONDS * 1000 + LOGO_DELAY + FADE_MS,
     );
 
     return () => {
-      window.clearTimeout(fade);
+      window.clearInterval(countdownTimer);
+      if (fade !== undefined) window.clearTimeout(fade);
       window.clearTimeout(done);
     };
   }, []);
@@ -27,8 +43,11 @@ export function Loader() {
       aria-hidden="true"
     >
       <div className="loader__ring">
-        <div className="loader__core" />
-        <img className="loader__logo" src="/Omega%20Logo.jpeg" alt="" />
+        {countdown !== null ? (
+          <div className="loader__countdown">{countdown}</div>
+        ) : (
+          <img className="loader__logo" src="/Omega%20Logo.jpeg" alt="" />
+        )}
       </div>
     </div>
   );
