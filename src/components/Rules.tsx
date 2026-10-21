@@ -50,6 +50,7 @@ export function Rules() {
             </Reveal>
           ))}
 
+          {/*
           <Reveal as="aside" className="rule rule--note">
             <p className="eyebrow">Last checked</p>
             <h3>Keep em printed.</h3>
@@ -58,6 +59,7 @@ export function Rules() {
               the decision desk only follows the print.
             </p>
           </Reveal>
+          */}
         </div>
       </section>
 
