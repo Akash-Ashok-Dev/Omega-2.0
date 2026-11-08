@@ -137,6 +137,41 @@ export const EVENT_PICS: readonly EventPic[] = [
     image: "/eventPics/6.mp4",
     mediaType: "video",
   },
+  {
+    id: "event-video-07",
+    tag: "EVENT REEL / 07",
+    title: "Event Reel 07",
+    image: "/eventPics/7.mp4",
+    mediaType: "video",
+  },
+  {
+    id: "event-video-08",
+    tag: "EVENT REEL / 08",
+    title: "Event Reel 08",
+    image: "/eventPics/8.mp4",
+    mediaType: "video",
+  },
+  {
+    id: "event-video-09",
+    tag: "EVENT REEL / 09",
+    title: "Event Reel 09",
+    image: "/eventPics/9.mp4",
+    mediaType: "video",
+  },
+  {
+    id: "event-video-10",
+    tag: "EVENT REEL / 10",
+    title: "Event Reel 10",
+    image: "/eventPics/10.mp4",
+    mediaType: "video",
+  },
+  {
+    id: "event-video-11",
+    tag: "EVENT REEL / 11",
+    title: "Event Reel 11",
+    image: "/eventPics/11.mp4",
+    mediaType: "video",
+  },
 ] as const;
 
 export const PASSES: readonly Pass[] = [
