@@ -12,6 +12,7 @@ export type FestEvent = {
   title: string;
   description: string;
   image: string;
+  accent?: string;
   large?: boolean;
 };
 
@@ -69,16 +70,46 @@ export const EVENTS: readonly FestEvent[] = [
     tag: "AUTONOMOUS",
     title: "Line Follower",
     description:
-      "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery.",
+      "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery decide who stays on the line.",
+    accent: "#ff2b2b",
     large: true,
-    image: "/MazeSolver.jpg",
+    image: "/eventPics/line-follower.jpg",
   },
   {
-    id: "mazesolver",
+    id: "maze-solver",
     tag: "PATHFINDING",
     title: "Maze Solver",
-    description: "Shortest path. Tight turns. Pure algorithmic brute force.",
-    image: "/LIne follower .jpg",
+    description:
+      "Shortest path. Tight turns. Pure algorithmic brute force. Give your bot the map and let it think faster than the clock.",
+    accent: "#ff5c1a",
+    image: "/eventPics/maze-solver.jpg",
+  },
+  {
+    id: "robo-war",
+    tag: "COMBAT",
+    title: "Robo War",
+    description:
+      "Steel against steel inside the arena. Torque, tactics, and a driver with ice in their veins.",
+    accent: "#38f3ff",
+    image: "/eventPics/arena.jpg",
+  },
+  {
+    id: "drone-race",
+    tag: "AERIAL",
+    title: "Drone Race",
+    description:
+      "FPS through gates, hairpin turns, and a course that punishes hesitation. Rotors up, nerves down.",
+    accent: "#ff3d9a",
+    image: "/eventPics/omega-night.jpg",
+  },
+  {
+    id: "circuit-sprint",
+    tag: "ELECTRONICS",
+    title: "Circuit Sprint",
+    description:
+      "Design, solder, and debug a working circuit under the clock. Clean signals take the podium.",
+    accent: "#ffc933",
+    image: "/eventPics/pit-lane.png",
   },
 ] as const;
 
