@@ -84,33 +84,6 @@ export const EVENTS: readonly FestEvent[] = [
     accent: "#ff5c1a",
     image: "/eventPics/maze-solver.jpg",
   },
-  {
-    id: "robo-war",
-    tag: "COMBAT",
-    title: "Robo War",
-    description:
-      "Steel against steel inside the arena. Torque, tactics, and a driver with ice in their veins.",
-    accent: "#38f3ff",
-    image: "/eventPics/arena.jpg",
-  },
-  {
-    id: "drone-race",
-    tag: "AERIAL",
-    title: "Drone Race",
-    description:
-      "FPS through gates, hairpin turns, and a course that punishes hesitation. Rotors up, nerves down.",
-    accent: "#ff3d9a",
-    image: "/eventPics/omega-night.jpg",
-  },
-  {
-    id: "circuit-sprint",
-    tag: "ELECTRONICS",
-    title: "Circuit Sprint",
-    description:
-      "Design, solder, and debug a working circuit under the clock. Clean signals take the podium.",
-    accent: "#ffc933",
-    image: "/eventPics/pit-lane.png",
-  },
 ] as const;
 
 export const EVENT_PICS: readonly EventPic[] = [
