@@ -344,14 +344,27 @@ export function EventGallery() {
                 tabIndex={active ? 0 : -1}
               >
                 <span className="gallery-card__frame">
-                  <img
-                    className="gallery-card__image"
-                    src={picture.image}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    draggable={false}
-                  />
+                  {picture.mediaType === "video" ? (
+                    <video
+                      className="gallery-card__image"
+                      src={picture.image}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      aria-label={picture.title}
+                    />
+                  ) : (
+                    <img
+                      className="gallery-card__image"
+                      src={picture.image}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                    />
+                  )}
                   <span className="gallery-card__scrim" aria-hidden="true" />
                   <span className="gallery-card__glass" aria-hidden="true" />
                   <span className="gallery-card__content">

@@ -27,6 +27,7 @@ export type EventPic = {
   tag: string;
   title: string;
   image: string;
+  mediaType: "image" | "video";
 };
 
 export type Pass = {
@@ -80,7 +81,7 @@ export const EVENTS: readonly FestEvent[] = [
       "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery decide who stays on the line.",
     accent: "#ff2b2b",
     large: true,
-    image: "/eventPics/line-follower.jpg",
+    image: "/eventPics/1.jpeg",
   },
   {
     id: "maze-solver",
@@ -89,40 +90,52 @@ export const EVENTS: readonly FestEvent[] = [
     description:
       "Shortest path. Tight turns. Pure algorithmic brute force. Give your bot the map and let it think faster than the clock.",
     accent: "#ff5c1a",
-    image: "/eventPics/maze-solver.jpg",
+    image: "/eventPics/2.jpeg",
   },
 ] as const;
 
 export const EVENT_PICS: readonly EventPic[] = [
   {
     id: "line-follower",
-    tag: "ARENA / 01",
-    title: "Line Follower",
-    image: "/eventPics/line-follower.jpg",
+    tag: "EVENT / 01",
+    title: "Omega 1.0",
+    image: "/eventPics/1.jpeg",
+    mediaType: "image",
   },
   {
     id: "maze-solver",
-    tag: "ARENA / 02",
-    title: "Maze Solver",
-    image: "/eventPics/maze-solver.jpg",
+    tag: "EVENT REEL / 02",
+    title: "Event Reel 02",
+    image: "/eventPics/2.jpeg",
+    mediaType: "image",
   },
   {
-    id: "arena",
-    tag: "MAIN FLOOR",
-    title: "The Arena",
-    image: "/eventPics/arena.jpg",
+    id: "event-video-03",
+    tag: "EVENT REEL / 03",
+    title: "Event Reel 03",
+    image: "/eventPics/3.mp4",
+    mediaType: "video",
   },
   {
-    id: "omega-night",
-    tag: "AFTER HOURS",
-    title: "Omega Night",
-    image: "/eventPics/omega-night.jpg",
+    id: "event-video-04",
+    tag: "EVENT REEL / 04",
+    title: "Event Reel 04",
+    image: "/eventPics/4.mp4",
+    mediaType: "video",
   },
   {
-    id: "pit-lane",
-    tag: "BUILD CREW",
-    title: "Pit Lane",
-    image: "/eventPics/pit-lane.png",
+    id: "event-video-05",
+    tag: "EVENT REEL / 05",
+    title: "Event Reel 05",
+    image: "/eventPics/5.mp4",
+    mediaType: "video",
+  },
+  {
+    id: "event-video-06",
+    tag: "EVENT REEL / 06",
+    title: "Event Reel 06",
+    image: "/eventPics/6.mp4",
+    mediaType: "video",
   },
 ] as const;
 

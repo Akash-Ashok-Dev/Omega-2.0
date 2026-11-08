@@ -921,10 +921,11 @@ section {
   --scale: 1;
   --opacity: 1;
   --blur: 0px;
+  --depth: 0px;
   position: absolute;
   top: 50%;
   left: 50%;
-  width: clamp(180px, 52vw, 320px);
+  width: clamp(180px, 56vw, 360px);
   aspect-ratio: 3 / 4;
   padding: 0;
   border: 0;
@@ -936,7 +937,7 @@ section {
   appearance: none;
   cursor: pointer;
   transform: translate(-50%, -50%) rotateY(calc(var(--offset) * var(--step)))
-    translateZ(var(--radius)) scale(var(--scale));
+    translateZ(calc(var(--radius) + var(--depth))) scale(var(--scale));
   transform-style: preserve-3d;
   opacity: var(--opacity);
   filter: blur(var(--blur)) saturate(0.82);
@@ -1075,6 +1076,8 @@ section {
 
 .gallery-card.is-active {
   cursor: default;
+  --depth: 180px;
+  z-index: 1000;
 }
 
 .gallery-card.is-active .gallery-card__frame {
@@ -1671,7 +1674,7 @@ section {
   }
 
   .gallery-card {
-    width: clamp(180px, 44vw, 300px);
+    width: clamp(180px, 48vw, 340px);
   }
 }
 
@@ -1771,7 +1774,7 @@ section {
   }
 
   .gallery-card {
-    width: clamp(165px, 58vw, 260px);
+    width: clamp(165px, 62vw, 280px);
     border-radius: 18px;
   }
 
