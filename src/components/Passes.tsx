@@ -18,27 +18,38 @@ export function Passes() {
           aside="One badge. A festival-sized experience."
         />
 
-        <div className="timeline">
+        <div className="pass-groups">
           {PASSES.map((pass) => (
-            <Reveal as="article" key={pass.id} className="pass">
-              <small>{pass.kind}</small>
+            <Reveal as="section" key={pass.id} className="pass-group">
+              <div className="pass-group__heading">
+                <small>{pass.kind}</small>
+                <p>{pass.description}</p>
+              </div>
 
-              <p>{pass.description}</p>
-
-              <div className="pass-grid">
-                <h3>{pass.title}</h3>
+              <div className="pass-grid" aria-label={`${pass.title} passes`}>
                 {PASSES_TYPE.map((passType) => (
                   <Reveal as="article" key={passType.id} className="pass">
-                    <small>{passType.kind}</small>
+                    <div className="pass__topline">
+                      <small>{passType.kind}</small>
+                      <span>NO. 0{passType.id === "Line Follower" ? "1" : "2"}</span>
+                    </div>
 
-                    <div>
-                      <span className="pass__member">FOR</span>
-                      <h3>{passType.title}</h3>
-                      <span className="pass__member">member</span>
+                    <div className="pass__details">
+                      <span className="pass__eyebrow">OMEGA &apos;26 / ADMIT ONE</span>
+                      <h3>{pass.title}</h3>
+                      <p>FOR {passType.title} MEMBER</p>
+                      <div className="pass__meta">
+                        <span><span aria-hidden="true">⌖</span> MEC, KOCHI</span>
+                        <span><span aria-hidden="true">◷</span> COMING SOON</span>
+                      </div>
                     </div>
 
                     <div className="pass__footer">
-                      <span className="price">{passType.price}</span>
+                      <span className="pass__stub-label">OMEGA 2.0</span>
+                      <span className="price">
+                        <small>₹</small>
+                        {passType.price}
+                      </span>
                       <button
                         className="pass__buy"
                         type="button"

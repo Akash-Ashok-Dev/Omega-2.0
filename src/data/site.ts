@@ -4,7 +4,13 @@ export type NavItem = {
   label: string;
 };
 
-export type SectionId = "home" | "events" | "passes" | "timeline" | "rules";
+export type SectionId =
+  | "home"
+  | "events"
+  | "gallery"
+  | "passes"
+  | "timeline"
+  | "rules";
 
 export type FestEvent = {
   id: string;
@@ -40,9 +46,10 @@ export type Pass_type = {
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: "home", index: "01", label: "HOME" },
   { id: "events", index: "02", label: "EVENTS" },
-  { id: "passes", index: "03", label: "PASSES" },
-  { id: "timeline", index: "04", label: "TIMELINE" },
-  { id: "rules", index: "05", label: "RULES" },
+  { id: "gallery", index: "03", label: "EVENT PICS" },
+  { id: "passes", index: "04", label: "PASSES" },
+  { id: "timeline", index: "05", label: "TIMELINE" },
+  { id: "rules", index: "06", label: "RULES" },
 ] as const;
 
 export const HERO = {
