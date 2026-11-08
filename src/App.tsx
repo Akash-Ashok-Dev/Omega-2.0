@@ -1,3 +1,4 @@
+import { EventGallery } from "@/components/EventGallery";
 import { Events } from "@/components/Events";
 import { Footer } from "@/components/Footer";
 import { Grain } from "@/components/Grain";
@@ -22,6 +23,7 @@ export default function App() {
         <Hero />
         <Marquee />
         <Events />
+        <EventGallery />
         <Passes />
         <Timeline />
         <Rules />

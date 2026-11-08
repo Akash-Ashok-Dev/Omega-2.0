@@ -15,6 +15,13 @@ export type FestEvent = {
   large?: boolean;
 };
 
+export type EventPic = {
+  id: string;
+  tag: string;
+  title: string;
+  image: string;
+};
+
 export type Pass = {
   id: string;
   kind: string;
@@ -75,6 +82,39 @@ export const EVENTS: readonly FestEvent[] = [
   },
 ] as const;
 
+export const EVENT_PICS: readonly EventPic[] = [
+  {
+    id: "line-follower",
+    tag: "ARENA / 01",
+    title: "Line Follower",
+    image: "/eventPics/line-follower.jpg",
+  },
+  {
+    id: "maze-solver",
+    tag: "ARENA / 02",
+    title: "Maze Solver",
+    image: "/eventPics/maze-solver.jpg",
+  },
+  {
+    id: "arena",
+    tag: "MAIN FLOOR",
+    title: "The Arena",
+    image: "/eventPics/arena.jpg",
+  },
+  {
+    id: "omega-night",
+    tag: "AFTER HOURS",
+    title: "Omega Night",
+    image: "/eventPics/omega-night.jpg",
+  },
+  {
+    id: "pit-lane",
+    tag: "BUILD CREW",
+    title: "Pit Lane",
+    image: "/eventPics/pit-lane.png",
+  },
+] as const;
+
 export const PASSES: readonly Pass[] = [
   {
     id: "Line Follower",
@@ -95,19 +135,19 @@ export const PASSES_TYPE: readonly Pass_type[] = [
     id: "Line Follower",
     kind: "OMEGA 2.0 / RAS",
     title: "RAS",
-    price: "REVEALING SOON",
+    price: "1799",
   },
   {
     id: "Maze Solver",
     kind: "OMEGA 2.0/ IEEE",
     title: "IEEE",
-    price: "REVEALING SOON",
+    price: "1799",
   },
   {
     id: "day-03",
     kind: "OMEGA 2.0 / Non-IEEE",
     title: "Non-IEEE",
-    price: "REVEALING SOON",
+    price: "1799",
   },
 ] as const;
 
