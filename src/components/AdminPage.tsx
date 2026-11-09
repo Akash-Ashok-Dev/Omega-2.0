@@ -411,6 +411,42 @@ export function AdminPage() {
     setError("");
   }
 
+  async function handleDownloadBackup() {
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/backup", {
+        headers: { "x-admin-token": token },
+      });
+
+      if (response.status === 401) {
+        handleLogout();
+        setError("Session expired. Please log in again.");
+        return;
+      }
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error ?? "Could not download database.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `omega-${new Date().toISOString().slice(0, 10)}.db`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not download database.",
+      );
+    }
+  }
+
   async function updateStatus(id: string, nextStatus: PaymentStatus) {
     setUpdatingId(id);
     setError("");
@@ -523,6 +559,13 @@ export function AdminPage() {
               disabled={loading}
             >
               {loading ? "Refreshing…" : "Refresh ↻"}
+            </button>
+            <button
+              className="admin__button admin__button--ghost"
+              type="button"
+              onClick={() => void handleDownloadBackup()}
+            >
+              Download DB ⤓
             </button>
             <button
               className="admin__button admin__button--ghost"

@@ -1,10 +1,11 @@
 import { randomUUID, timingSafeEqual } from "node:crypto";
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import cors from "cors";
 import express from "express";
 
-import { databasePath, db } from "./db.js";
+import { db } from "./db.js";
 
 const PORT = Number(process.env.PORT ?? 3001);
 const GOOGLE_FORM_URL = process.env.GOOGLE_FORM_URL ?? "https://forms.google.com/";
@@ -187,7 +188,15 @@ function hasValidAdminToken(req) {
 
 const app = express();
 app.disable("x-powered-by");
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "16kb" }));
+
+app.use((req, res, next) => {
+  if (/\.(db|sqlite|sqlite3)$/i.test(req.path)) {
+    return res.status(404).end();
+  }
+  return next();
+});
 
 const allowedOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:5173")
   .split(",")
@@ -206,7 +215,32 @@ app.use(
 );
 
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", database: databasePath });
+  res.json({ status: "ok" });
+});
+
+app.get("/api/admin/backup", (req, res) => {
+  if (!hasValidAdminToken(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
+  let tempDir;
+  try {
+    tempDir = mkdtempSync(join(tmpdir(), "omega-backup-"));
+    const backupPath = join(tempDir, "omega.db");
+    db.exec(`VACUUM INTO '${backupPath.replaceAll("'", "''")}'`);
+    const stamp = new Date().toISOString().slice(0, 10);
+
+    return res.download(backupPath, `omega-${stamp}.db`, (error) => {
+      rmSync(tempDir, { recursive: true, force: true });
+      if (error && !res.headersSent) {
+        res.status(500).json({ error: "Could not export database." });
+      }
+    });
+  } catch (error) {
+    if (tempDir) rmSync(tempDir, { recursive: true, force: true });
+    console.error("Database export failed:", error);
+    return res.status(500).json({ error: "Could not export database." });
+  }
 });
 
 app.post("/api/admin/login", loginRateLimit, (req, res) => {
