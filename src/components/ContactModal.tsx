@@ -158,10 +158,7 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
               {TEAM.map((member, index) => (
                 <li className="crew" key={member.email}>
                   <span className="crew__avatar" aria-hidden="true">
-                    {member.name
-                      .split(" ")
-                      .map((part) => part[0])
-                      .join("")}
+                    {member.name.split(/\s+/)[0].slice(0, 2).toUpperCase()}
                   </span>
 
                   <div className="crew__info">
