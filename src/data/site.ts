@@ -79,9 +79,9 @@ export const EVENTS: readonly FestEvent[] = [
     title: "Line Follower",
     description:
       "Race your self-guided bot along a razor-sharp track. Speed, precision, and PID mastery decide who stays on the line.",
-    accent: "#ff2b2b",
+    accent: "#ffd400",
     large: true,
-    image: "/eventPics/1.jpeg",
+    image: "/LineFollower.jpg",
   },
   {
     id: "maze-solver",
@@ -89,8 +89,8 @@ export const EVENTS: readonly FestEvent[] = [
     title: "Maze Solver",
     description:
       "Shortest path. Tight turns. Pure algorithmic brute force. Give your bot the map and let it think faster than the clock.",
-    accent: "#ff5c1a",
-    image: "/eventPics/2.jpeg",
+    accent: "#ffb300",
+    image: "/MazeSolver.jpg",
   },
 ] as const;
 

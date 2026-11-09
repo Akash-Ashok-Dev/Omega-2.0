@@ -6,7 +6,10 @@ import { RegistrationModal } from "@/components/RegistrationModal";
 import { SectionHead } from "@/components/SectionHead";
 
 export function Passes() {
-  const [selectedPass, setSelectedPass] = useState<string | null>(null);
+  const [selectedPass, setSelectedPass] = useState<{
+    eventTitle: string;
+    passTitle: string;
+  } | null>(null);
 
   return (
     <>
@@ -53,8 +56,13 @@ export function Passes() {
                       <button
                         className="pass__buy"
                         type="button"
-                        onClick={() => setSelectedPass(passType.title)}
-                        aria-label={`Buy ${passType.title} pass`}
+                        onClick={() =>
+                          setSelectedPass({
+                            eventTitle: pass.title,
+                            passTitle: passType.title,
+                          })
+                        }
+                        aria-label={`Buy ${passType.title} pass for ${pass.title}`}
                       >
                         BUY ↗
                       </button>
@@ -69,7 +77,8 @@ export function Passes() {
 
       {selectedPass && (
         <RegistrationModal
-          passTitle={selectedPass}
+          eventTitle={selectedPass.eventTitle}
+          passTitle={selectedPass.passTitle}
           onClose={() => setSelectedPass(null)}
         />
       )}
