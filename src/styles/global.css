@@ -2019,98 +2019,68 @@ section {
   box-shadow: 0 0 0 2px rgba(255, 212, 0, 0.18);
 }
 
-.registration-select {
-  position: relative;
-  display: block;
+.registration-form__team-name {
+  grid-column: 1 / -1;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 212, 0, 0.45);
+  background: rgba(255, 212, 0, 0.06);
+  text-align: center;
 }
 
-.registration-select__value {
-  position: absolute;
-  width: 1px !important;
-  min-height: 1px !important;
-  padding: 0 !important;
-  opacity: 0;
-  pointer-events: none;
+.registration-form__team-name input {
+  text-align: center;
+  font: 1.05rem/1.2 "Space Grotesk", sans-serif;
+  letter-spacing: 0.04em;
 }
 
-.registration-select__trigger {
-  width: 100%;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--muted);
-  cursor: pointer;
-  font: 0.85rem/1.2 "Space Grotesk", sans-serif;
-  text-align: left;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+.registration-team-member {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.registration-select__trigger.has-value {
-  color: var(--text);
+.registration-team-member--leader {
+  border-color: rgba(255, 212, 0, 0.4);
+  box-shadow: inset 3px 0 0 var(--lime);
 }
 
-.registration-select__trigger:hover,
-.registration-select__trigger[aria-expanded="true"] {
-  border-color: var(--lime);
+.registration-team-member legend {
+  padding: 0 8px;
   color: var(--lime);
-  background-color: rgba(255, 212, 0, 0.1);
+  font: 0.65rem/1 "DM Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.registration-select__arrow {
-  color: var(--lime);
-  font: 1.2rem/0.8 "DM Mono", monospace;
-}
-
-.registration-select__menu {
-  position: absolute;
-  z-index: 4;
-  top: calc(100% + 7px);
-  right: 0;
-  left: 0;
-  padding: 8px;
-  border: 1px solid rgba(255, 212, 0, 0.65);
-  background: #171500;
-  box-shadow: 7px 7px 0 #5a4a00, 0 15px 32px rgba(0, 0, 0, 0.5);
-}
-
-.registration-select__hint {
-  display: block;
-  padding: 7px 10px 9px;
+.registration-team-member legend span {
+  margin-left: 8px;
   color: var(--muted);
-  font: 0.58rem/1 "DM Mono", monospace;
-  letter-spacing: 0.12em;
+  font-size: 0.9em;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
-.registration-select__option {
-  width: 100%;
+.registration-team-member__hint {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font: 0.72rem/1.4 "Space Grotesk", sans-serif;
+}
+
+.registration-team-member__fields {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
-  align-items: center;
-  gap: 7px;
-  padding: 11px 10px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  font: 0.84rem/1 "Space Grotesk", sans-serif;
-  text-align: left;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
 }
 
-.registration-select__option:hover,
-.registration-select__option.is-selected {
-  border-color: rgba(255, 212, 0, 0.5);
-  background: rgba(255, 212, 0, 0.16);
-  color: var(--lime);
+.registration-team-member__field--third {
+  grid-column: span 2;
 }
 
-.registration-select__option-index {
-  color: var(--muted);
-  font: 0.62rem/1 "DM Mono", monospace;
+.registration-team-member__field--half {
+  grid-column: span 3;
 }
 
 .registration-form__submit {
@@ -2209,6 +2179,15 @@ section {
 
   .registration-form {
     grid-template-columns: 1fr;
+  }
+
+  .registration-team-member__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .registration-team-member__field--third,
+  .registration-team-member__field--half {
+    grid-column: auto;
   }
 
   .registration-modal__payment {
@@ -3384,7 +3363,7 @@ a.win__desk-row:hover b {
 }
 
 .admin-table--pass {
-  min-width: 980px;
+  min-width: 1120px;
 }
 
 .admin-status-group {
@@ -3414,4 +3393,862 @@ a.win__desk-row:hover b {
 
 .admin-status-group--FAILED .admin-table-wrap {
   box-shadow: inset 3px 0 0 #ff8a80;
+}
+
+/* ---------- Admin team rows ---------- */
+.admin-table__row {
+  cursor: pointer;
+}
+
+.admin-table__row.is-expanded {
+  background: rgba(255, 212, 0, 0.1);
+}
+
+.admin-team__toggle {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-team__name {
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.admin-team__leader {
+  color: var(--muted);
+  font: 0.62rem/1.3 "DM Mono", monospace;
+  letter-spacing: 0.04em;
+}
+
+.admin-table__details-row > td {
+  padding: 0 !important;
+  background: #0c0c0c;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-table tbody .admin-table__details-row:hover {
+  background: transparent;
+}
+
+.admin-team-details {
+  padding: 16px 18px 18px;
+  border-left: 3px solid var(--lime);
+}
+
+.admin-team-details__head {
+  margin: 0 0 10px;
+  color: var(--lime);
+  font: 0.58rem/1 "DM Mono", monospace;
+  letter-spacing: 0.12em;
+}
+
+.admin-team-details ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-team-details li {
+  display: grid;
+  grid-template-columns:
+    74px minmax(120px, 1fr) minmax(120px, 0.8fr)
+    minmax(180px, 1.2fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.78rem;
+}
+
+.admin-team-details__pos {
+  color: var(--orange);
+  font: 0.56rem/1 "DM Mono", monospace;
+  letter-spacing: 0.08em;
+}
+
+.admin-team-details__name {
+  color: #fff;
+}
+
+.admin-team-details__meta {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font: 0.62rem/1.4 "DM Mono", monospace;
+  letter-spacing: 0.04em;
+}
+
+.admin-team-details a {
+  color: var(--muted);
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.admin-team-details a:hover {
+  color: var(--lime);
+}
+
+@media (max-width: 720px) {
+  .admin-team-details li {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+}
+
+/* ---------- top bar actions ---------- */
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* ---------- admin check-in ---------- */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-tabs button {
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 0.66rem/1 "DM Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: 0.2s ease;
+}
+
+.admin-tabs button:hover {
+  color: var(--lime);
+}
+
+.admin-tabs button.is-active {
+  border-color: var(--line);
+  background: rgba(255, 212, 0, 0.08);
+  color: var(--lime);
+}
+
+.admin-checkin {
+  display: inline-block;
+  color: var(--muted);
+  font: 0.62rem/1.4 "DM Mono", monospace;
+  letter-spacing: 0.03em;
+}
+
+.admin-checkin--yes {
+  color: #7dff9b;
+}
+
+.admin-team-details__checkin {
+  margin: 0 0 12px;
+  color: #7dff9b;
+  font: 0.62rem/1.4 "DM Mono", monospace;
+  letter-spacing: 0.06em;
+}
+
+.checkin {
+  margin-top: 24px;
+}
+
+.checkin__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.checkin__head h2 {
+  margin: 8px 0 6px;
+  font: clamp(2rem, 5vw, 3.4rem) / 0.9 "Anton", sans-serif;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 #5a4a00;
+}
+
+.checkin__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.checkin__controls label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font: 0.58rem/1 "DM Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.checkin__controls select,
+.checkin__controls input,
+.checkin-manual input {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  outline: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: 0.85rem/1.2 "Space Grotesk", sans-serif;
+}
+
+.checkin__controls select:focus,
+.checkin__controls input:focus,
+.checkin-manual input:focus {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 2px rgba(255, 212, 0, 0.18);
+}
+
+.checkin__controls select:disabled,
+.checkin__controls input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkin-stats {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.5fr) minmax(180px, 1fr) minmax(150px, 0.5fr);
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.checkin-stat {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.checkin-stat small {
+  color: var(--muted);
+  font: 0.58rem/1 "DM Mono", monospace;
+  letter-spacing: 0.1em;
+}
+
+.checkin-stat strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--lime);
+  font: clamp(1.6rem, 4vw, 2.2rem) / 1 "Anton", sans-serif;
+}
+
+.checkin-stat button {
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--lime);
+  background: transparent;
+  color: var(--lime);
+  cursor: pointer;
+  font: 0.58rem/1 "DM Mono", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.checkin-stat button:hover {
+  background: var(--lime);
+  color: #111;
+}
+
+.checkin-progress {
+  height: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.checkin-progress span {
+  display: block;
+  height: 100%;
+  background: var(--lime);
+  transition: width 0.3s ease;
+}
+
+.checkin__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 18px;
+}
+
+.checkin-camera,
+.checkin-manual {
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.checkin-reader {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 280px;
+  max-height: 520px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 212, 0, 0.35);
+  background: #000;
+}
+
+.checkin-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+.checkin-camera__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.checkin-camera__actions button,
+.checkin-manual button {
+  padding: 11px 14px;
+  border: 1px solid var(--lime);
+  background: var(--lime);
+  color: #111;
+  cursor: pointer;
+  font: 0.66rem/1 "DM Mono", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: 0.2s ease;
+}
+
+.checkin-camera__actions button:hover:not(:disabled),
+.checkin-manual button:hover:not(:disabled) {
+  background: #111;
+  color: var(--lime);
+}
+
+.checkin-camera__actions button:disabled,
+.checkin-manual button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.checkin-hint {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font: 0.7rem/1.5 "DM Mono", monospace;
+}
+
+.checkin-manual h3 {
+  margin: 0 0 12px;
+  font: 1.1rem/1 "Anton", sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.checkin-manual form {
+  display: flex;
+  gap: 10px;
+}
+
+.checkin-manual form input {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.checkin-results {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkin-results li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.checkin-results li > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.checkin-results strong {
+  color: #fff;
+}
+
+.checkin-results span {
+  color: var(--muted);
+  font: 0.66rem/1.35 "DM Mono", monospace;
+  overflow-wrap: anywhere;
+}
+
+.checkin-feedback {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 28px;
+  border: 0;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  animation: checkin-pop 0.18s ease-out;
+}
+
+@keyframes checkin-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.checkin-feedback--success {
+  background: #073d19;
+  color: #7dff9b;
+}
+
+.checkin-feedback--warning {
+  background: #3d2a00;
+  color: #ffd166;
+}
+
+.checkin-feedback--error {
+  background: #3d0b0b;
+  color: #ff8a80;
+}
+
+.checkin-feedback--info {
+  background: #151300;
+  color: var(--lime);
+}
+
+.checkin-feedback__title {
+  font: clamp(3rem, 12vw, 8rem) / 0.85 "Anton", sans-serif;
+  text-transform: uppercase;
+  text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.35);
+}
+
+.checkin-feedback__detail {
+  max-width: 760px;
+  font: clamp(1rem, 2.4vw, 1.5rem) / 1.35 "DM Mono", monospace;
+  overflow-wrap: anywhere;
+}
+
+.checkin-feedback__hint {
+  margin-top: 10px;
+  font: 0.68rem/1 "DM Mono", monospace;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+/* ---------- registration ticket ---------- */
+.registration-modal__ticket {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 18px;
+  border: 1px solid rgba(255, 212, 0, 0.5);
+  background: rgba(255, 212, 0, 0.06);
+}
+
+.registration-modal__ticket-qr {
+  width: min(100%, 244px);
+  padding: 12px;
+  background: #fff;
+  box-shadow: 5px 5px 0 #5a4a00;
+}
+
+.registration-modal__ticket-qr svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.registration-modal__ticket-details h3 {
+  margin: 6px 0 10px;
+  font: clamp(1.4rem, 3vw, 2rem) / 1 "Anton", sans-serif;
+  text-transform: uppercase;
+}
+
+.registration-modal__short-code {
+  margin: 0 0 10px;
+  color: var(--lime);
+  font: 1.5rem/1 "DM Mono", monospace;
+  letter-spacing: 0.12em;
+}
+
+.registration-modal__ticket-note {
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.registration-modal__ticket-link {
+  display: inline-block;
+  padding: 10px 14px;
+  background: var(--lime);
+  color: #111;
+  box-shadow: 4px 4px 0 #5a4a00;
+  font: 0.68rem/1 "DM Mono", monospace;
+  text-transform: uppercase;
+}
+
+/* ---------- ticket page ---------- */
+.ticket-page {
+  min-height: 100vh;
+  padding: clamp(18px, 4vw, 42px);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 212, 0, 0.14), transparent 45%),
+    var(--bg);
+}
+
+.ticket-page__shell {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.ticket-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ticket-page__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font: 0.68rem/1 "DM Mono", monospace;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+}
+
+.ticket-page__brand img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+}
+
+.ticket-page__back {
+  color: var(--muted);
+  font: 0.66rem/1 "DM Mono", monospace;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.ticket-page__back:hover {
+  color: var(--lime);
+}
+
+.ticket-card {
+  margin-top: 30px;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid rgba(255, 212, 0, 0.45);
+  background: linear-gradient(135deg, #201d00, #0d0d0d 60%);
+  box-shadow: 10px 10px 0 #5a4a00;
+}
+
+.ticket-card--message {
+  width: min(620px, 100%);
+  margin: 60px auto 0;
+}
+
+.ticket-card h1 {
+  margin: 10px 0;
+  font: clamp(2.2rem, 6vw, 4rem) / 0.9 "Anton", sans-serif;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0 #5a4a00;
+  overflow-wrap: anywhere;
+}
+
+.ticket-card__intro {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ticket-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ticket-card__leader {
+  margin: 0;
+  color: var(--muted);
+  font: 0.72rem/1.4 "DM Mono", monospace;
+}
+
+.ticket-status {
+  padding: 6px 10px;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  font: 0.62rem/1 "DM Mono", monospace;
+  letter-spacing: 0.08em;
+}
+
+.ticket-status--in {
+  border-color: #7dff9b;
+  color: #7dff9b;
+}
+
+.ticket-card__body {
+  display: grid;
+  grid-template-columns: 352px minmax(0, 1fr);
+  align-items: center;
+  gap: 28px;
+  margin-top: 24px;
+}
+
+.ticket-qr {
+  width: min(100%, 352px);
+  padding: 16px;
+  background: #fff;
+  box-shadow: 6px 6px 0 #5a4a00;
+}
+
+.ticket-qr svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.ticket-card__details {
+  display: grid;
+  gap: 8px;
+}
+
+.ticket-card__label {
+  margin: 0;
+  color: var(--muted);
+  font: 0.6rem/1 "DM Mono", monospace;
+  letter-spacing: 0.12em;
+}
+
+.ticket-card__short-code {
+  margin: 0 0 4px;
+  color: var(--lime);
+  font: clamp(1.8rem, 5vw, 3rem) / 1 "DM Mono", monospace;
+  letter-spacing: 0.12em;
+  overflow-wrap: anywhere;
+}
+
+.ticket-card__note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ticket-card__link {
+  justify-self: start;
+  margin-top: 8px;
+  padding: 11px 14px;
+  background: var(--lime);
+  color: #111;
+  box-shadow: 4px 4px 0 #5a4a00;
+  font: 0.68rem/1 "DM Mono", monospace;
+  text-transform: uppercase;
+}
+
+.ticket-card__checked {
+  margin: 6px 0 0;
+  color: #7dff9b;
+  font: 0.72rem/1.5 "DM Mono", monospace;
+}
+
+.ticket-card__footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.ticket-card__footer button {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 0.62rem/1 "DM Mono", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ticket-card__footer button:hover {
+  border-color: var(--lime);
+  color: var(--lime);
+}
+
+.ticket-lookup {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ticket-lookup label {
+  display: grid;
+  gap: 8px;
+  color: #fff;
+  font: 0.66rem/1 "DM Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticket-lookup input {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  outline: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: 0.9rem/1.2 "Space Grotesk", sans-serif;
+}
+
+.ticket-lookup input:focus {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 2px rgba(255, 212, 0, 0.18);
+}
+
+.ticket-lookup button {
+  justify-self: start;
+  padding: 12px 16px;
+  border: 2px solid #111;
+  background: var(--lime);
+  color: #111;
+  box-shadow: 5px 5px 0 #5a4a00;
+  cursor: pointer;
+  font: 0.7rem/1 "DM Mono", monospace;
+  text-transform: uppercase;
+}
+
+.ticket-lookup button:hover:not(:disabled) {
+  background: #111;
+  color: var(--lime);
+}
+
+.ticket-lookup button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ticket-card__error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #ff5a4d;
+  background: rgba(255, 90, 77, 0.12);
+  color: #ffb3ad;
+  font: 0.72rem/1.4 "DM Mono", monospace;
+}
+
+@media (max-width: 900px) {
+  .checkin__grid,
+  .ticket-card__body {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-qr {
+    margin: 0 auto;
+  }
+
+  .checkin-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .checkin-progress {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+@media (max-width: 800px) {
+  .registration-modal__ticket {
+    grid-template-columns: 1fr;
+  }
+
+  .registration-modal__ticket-qr {
+    margin: 0 auto;
+  }
+
+  .checkin__controls {
+    width: 100%;
+  }
+
+  .checkin__controls label {
+    flex: 1 1 180px;
+  }
+
+  .checkin__controls select,
+  .checkin__controls input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .topbar__actions {
+    gap: 10px;
+  }
+
+  .checkin-manual form {
+    flex-direction: column;
+  }
+
+  .checkin-results li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ticket-page {
+    padding: 14px;
+  }
+
+  .ticket-card {
+    box-shadow: 6px 6px 0 #5a4a00;
+  }
+
+  .ticket-card__head {
+    flex-direction: column;
+  }
+
+  .checkin-feedback__title {
+    font-size: clamp(2.6rem, 14vw, 5rem);
+  }
 }

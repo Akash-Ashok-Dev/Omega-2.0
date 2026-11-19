@@ -1,4 +1,7 @@
 import {
+  Fragment,
+  Suspense,
+  lazy,
   useCallback,
   useEffect,
   useState,
@@ -6,11 +9,25 @@ import {
 } from "react";
 
 import { EVENTS, PASSES_TYPE } from "@/data/site";
+import { formatTicketDate } from "@/lib/tickets";
+
+const CheckInScanner = lazy(() => import("@/components/CheckInScanner"));
 
 type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED";
 
+type TeamMember = {
+  id: string;
+  position: number;
+  name: string;
+  mobileNumber: string;
+  mail: string;
+  department: string;
+  college: string;
+};
+
 type Registration = {
   id: string;
+  teamName: string;
   name: string;
   mobileNumber: string;
   mail: string;
@@ -21,15 +38,29 @@ type Registration = {
   passTitle: string;
   paymentStatus: PaymentStatus;
   orderId: string | null;
+  ticketToken: string;
+  shortCode: string;
+  eventId: string;
+  userId: string | null;
+  checkedIn: boolean;
+  checkedInAt: string | null;
+  checkedInBy: string | null;
   createdAt: string;
+  members: TeamMember[];
 };
 
 type Summary = Record<PaymentStatus, number>;
+
+type CheckInSummary = {
+  total: number;
+  checkedIn: number;
+};
 
 type ListResponse = {
   registrations: Registration[];
   count: number;
   summary: Summary;
+  checkIn?: CheckInSummary;
 };
 
 const TOKEN_KEY = "omega-admin-token";
@@ -37,12 +68,7 @@ const STATUSES = ["ALL", "PENDING", "SUCCESS", "FAILED"] as const;
 type StatusFilter = (typeof STATUSES)[number];
 
 const EMPTY_SUMMARY: Summary = { PENDING: 0, SUCCESS: 0, FAILED: 0 };
-
-function formatDate(value: string) {
-  const date = new Date(`${value.replace(" ", "T")}Z`);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString();
-}
+const EMPTY_CHECK_IN: CheckInSummary = { total: 0, checkedIn: 0 };
 
 const PASS_ORDER = EVENTS.flatMap((event) =>
   PASSES_TYPE.map((pass) => ({
@@ -57,6 +83,21 @@ function summarize(records: Registration[]): Summary {
     result[record.paymentStatus] += 1;
   }
   return result;
+}
+
+function teamMembersOf(record: Registration): TeamMember[] {
+  if (record.members?.length) return record.members;
+  return [
+    {
+      id: `${record.id}-leader`,
+      position: 1,
+      name: record.name,
+      mobileNumber: record.mobileNumber,
+      mail: record.mail,
+      department: record.department,
+      college: record.college,
+    },
+  ];
 }
 
 type PassGroup = {
@@ -95,6 +136,8 @@ type StatusGroupProps = {
   records: Registration[];
   updatingId: string | null;
   onUpdateStatus: (id: string, status: PaymentStatus) => void;
+  expandedId: string | null;
+  onToggleRow: (id: string) => void;
 };
 
 function StatusGroup({
@@ -102,6 +145,8 @@ function StatusGroup({
   records,
   updatingId,
   onUpdateStatus,
+  expandedId,
+  onToggleRow,
 }: StatusGroupProps) {
   return (
     <div className={`admin-status-group admin-status-group--${status}`}>
@@ -115,7 +160,8 @@ function StatusGroup({
           <thead>
             <tr>
               <th>Created</th>
-              <th>Name</th>
+              <th>Check-in</th>
+              <th>Team / Leader</th>
               <th>Mobile</th>
               <th>Mail</th>
               <th>Dept</th>
@@ -127,42 +173,134 @@ function StatusGroup({
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td className="admin-empty" colSpan={8}>
+                <td className="admin-empty" colSpan={9}>
                   No {status.toLowerCase()} registrations.
                 </td>
               </tr>
             ) : (
-              records.map((record) => (
-                <tr key={record.id}>
-                  <td className="admin-table__muted">
-                    {formatDate(record.createdAt)}
-                  </td>
-                  <td>{record.name}</td>
-                  <td>{record.mobileNumber}</td>
-                  <td>{record.mail}</td>
-                  <td>{record.department}</td>
-                  <td>{record.college}</td>
-                  <td className="admin-table__muted">
-                    {record.ambassadorCode || "—"}
-                  </td>
-                  <td>
-                    <div className="admin-row-actions">
-                      {PAYMENT_STATUS_ORDER.filter(
-                        (option) => option !== record.paymentStatus,
-                      ).map((option) => (
-                        <button
-                          key={option}
-                          type="button"
-                          disabled={updatingId === record.id}
-                          onClick={() => onUpdateStatus(record.id, option)}
+              records.map((record) => {
+                const isExpanded = expandedId === record.id;
+                const members = teamMembersOf(record);
+
+                return (
+                  <Fragment key={record.id}>
+                    <tr
+                      className={`admin-table__row${
+                        isExpanded ? " is-expanded" : ""
+                      }`}
+                      onClick={() => onToggleRow(record.id)}
+                    >
+                      <td className="admin-table__muted">
+                        {formatTicketDate(record.createdAt)}
+                      </td>
+                      <td>
+                        <span
+                          className={`admin-checkin${
+                            record.checkedIn ? " admin-checkin--yes" : ""
+                          }`}
                         >
-                          {option}
+                          {record.checkedIn
+                            ? `✓ ${
+                                record.checkedInAt
+                                  ? formatTicketDate(record.checkedInAt)
+                                  : "IN"
+                              }`
+                            : "—"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="admin-team__toggle"
+                          aria-expanded={isExpanded}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onToggleRow(record.id);
+                          }}
+                        >
+                          <span className="admin-team__name">
+                            {record.teamName || record.name}
+                          </span>
+                          <span className="admin-team__leader">
+                            {isExpanded ? "▾" : "▸"} Leader: {record.name} ·{" "}
+                            {members.length} member
+                            {members.length === 1 ? "" : "s"}
+                          </span>
                         </button>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      </td>
+                      <td>{record.mobileNumber}</td>
+                      <td>{record.mail}</td>
+                      <td>{record.department}</td>
+                      <td>{record.college}</td>
+                      <td className="admin-table__muted">
+                        {record.ambassadorCode || "—"}
+                      </td>
+                      <td onClick={(event) => event.stopPropagation()}>
+                        <div className="admin-row-actions">
+                          {PAYMENT_STATUS_ORDER.filter(
+                            (option) => option !== record.paymentStatus,
+                          ).map((option) => (
+                            <button
+                              key={option}
+                              type="button"
+                              disabled={updatingId === record.id}
+                              onClick={() => onUpdateStatus(record.id, option)}
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr className="admin-table__details-row">
+                        <td colSpan={9}>
+                          <div className="admin-team-details">
+                            <p className="admin-team-details__head">
+                              TEAM MEMBERS / {members.length} OF 4
+                            </p>
+                            {record.checkedIn && (
+                              <p className="admin-team-details__checkin">
+                                CHECKED IN{" "}
+                                {record.checkedInAt
+                                  ? formatTicketDate(record.checkedInAt)
+                                  : ""}
+                                {record.checkedInBy
+                                  ? ` BY ${record.checkedInBy}`
+                                  : ""}
+                              </p>
+                            )}
+                            <ul>
+                              {members.map((member) => (
+                                <li key={member.id}>
+                                  <span className="admin-team-details__pos">
+                                    {member.position === 1
+                                      ? "LEADER"
+                                      : `MEMBER ${member.position}`}
+                                  </span>
+                                  <span className="admin-team-details__name">
+                                    {member.name}
+                                  </span>
+                                  <a href={`tel:${member.mobileNumber}`}>
+                                    {member.mobileNumber}
+                                  </a>
+                                  <a href={`mailto:${member.mail}`}>
+                                    {member.mail}
+                                  </a>
+                                  <span className="admin-team-details__meta">
+                                    DEPT {member.department || "—"} · COLLEGE{" "}
+                                    {member.college || "—"}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -178,6 +316,8 @@ type PassSectionProps = {
   records: Registration[];
   updatingId: string | null;
   onUpdateStatus: (id: string, status: PaymentStatus) => void;
+  expandedId: string | null;
+  onToggleRow: (id: string) => void;
 };
 
 function PassSection({
@@ -187,6 +327,8 @@ function PassSection({
   records,
   updatingId,
   onUpdateStatus,
+  expandedId,
+  onToggleRow,
 }: PassSectionProps) {
   const stats = summarize(records);
   const grouped: Record<PaymentStatus, Registration[]> = {
@@ -227,6 +369,12 @@ function PassSection({
             <small>FAILED</small>
             <strong>{stats.FAILED}</strong>
           </span>
+          <span>
+            <small>CHECKED IN</small>
+            <strong>
+              {records.filter((record) => record.checkedIn).length}
+            </strong>
+          </span>
         </div>
       </header>
 
@@ -237,6 +385,8 @@ function PassSection({
           records={grouped[status]}
           updatingId={updatingId}
           onUpdateStatus={onUpdateStatus}
+          expandedId={expandedId}
+          onToggleRow={onToggleRow}
         />
       ))}
     </section>
@@ -247,12 +397,16 @@ type UnassignedSectionProps = {
   records: Registration[];
   updatingId: string | null;
   onUpdateStatus: (id: string, status: PaymentStatus) => void;
+  expandedId: string | null;
+  onToggleRow: (id: string) => void;
 };
 
 function UnassignedSection({
   records,
   updatingId,
   onUpdateStatus,
+  expandedId,
+  onToggleRow,
 }: UnassignedSectionProps) {
   const grouped: Record<PaymentStatus, Registration[]> = {
     PENDING: [],
@@ -292,6 +446,8 @@ function UnassignedSection({
           records={grouped[status]}
           updatingId={updatingId}
           onUpdateStatus={onUpdateStatus}
+          expandedId={expandedId}
+          onToggleRow={onToggleRow}
         />
       ))}
     </section>
@@ -306,12 +462,18 @@ export function AdminPage() {
   const [password, setPassword] = useState("");
   const [records, setRecords] = useState<Registration[]>([]);
   const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
+  const [checkInSummary, setCheckInSummary] =
+    useState<CheckInSummary>(EMPTY_CHECK_IN);
+  const [view, setView] = useState<"registrations" | "scanner">(
+    "registrations",
+  );
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [loading, setLoading] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     const meta = document.createElement("meta");
@@ -352,6 +514,7 @@ export function AdminPage() {
       const data = body as ListResponse;
       setRecords(data.registrations ?? []);
       setSummary(data.summary ?? EMPTY_SUMMARY);
+      setCheckInSummary(data.checkIn ?? EMPTY_CHECK_IN);
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -364,12 +527,12 @@ export function AdminPage() {
   }, [token, status, search]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || view === "scanner") return;
     const timer = window.setTimeout(() => {
       void refresh();
     }, 250);
     return () => window.clearTimeout(timer);
-  }, [refresh, token]);
+  }, [refresh, token, view]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -408,7 +571,14 @@ export function AdminPage() {
     setToken("");
     setRecords([]);
     setSummary(EMPTY_SUMMARY);
+    setCheckInSummary(EMPTY_CHECK_IN);
+    setView("registrations");
     setError("");
+    setExpandedId(null);
+  }
+
+  function toggleRow(id: string) {
+    setExpandedId((current) => (current === id ? null : id));
   }
 
   async function handleDownloadBackup() {
@@ -546,20 +716,26 @@ export function AdminPage() {
         <header className="admin__header">
           <div>
             <p className="eyebrow">OMEGA 2.0 / CONTROL ROOM</p>
-            <h1 className="admin__title">Registrations</h1>
+            <h1 className="admin__title">
+              {view === "scanner" ? "Check-in" : "Registrations"}
+            </h1>
             <p className="admin__subtitle">
-              {records.length} shown · live records from the server database
+              {view === "scanner"
+                ? "Scan and verify tickets at the venue"
+                : `${records.length} shown · live records from the server database`}
             </p>
           </div>
           <div className="admin__actions">
-            <button
-              className="admin__button admin__button--ghost"
-              type="button"
-              onClick={() => void refresh()}
-              disabled={loading}
-            >
-              {loading ? "Refreshing…" : "Refresh ↻"}
-            </button>
+            {view === "registrations" && (
+              <button
+                className="admin__button admin__button--ghost"
+                type="button"
+                onClick={() => void refresh()}
+                disabled={loading}
+              >
+                {loading ? "Refreshing…" : "Refresh ↻"}
+              </button>
+            )}
             <button
               className="admin__button admin__button--ghost"
               type="button"
@@ -577,75 +753,118 @@ export function AdminPage() {
           </div>
         </header>
 
-        <section className="admin-stats" aria-label="Registration totals">
-          <article className="admin-stat">
-            <small>TOTAL</small>
-            <strong>{total}</strong>
-          </article>
-          <article className="admin-stat">
-            <small>PENDING</small>
-            <strong>{summary.PENDING}</strong>
-          </article>
-          <article className="admin-stat">
-            <small>SUCCESS</small>
-            <strong>{summary.SUCCESS}</strong>
-          </article>
-          <article className="admin-stat">
-            <small>FAILED</small>
-            <strong>{summary.FAILED}</strong>
-          </article>
-        </section>
-
-        <div className="admin-toolbar">
-          <input
-            type="search"
-            placeholder="Search name, mail, mobile, college…"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            aria-label="Search registrations"
-          />
-          <select
-            value={status}
-            onChange={(event) => setStatus(event.target.value as StatusFilter)}
-            aria-label="Filter by payment status"
+        <div className="admin-tabs" role="tablist" aria-label="Admin views">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "registrations"}
+            className={view === "registrations" ? "is-active" : ""}
+            onClick={() => setView("registrations")}
           >
-            {STATUSES.map((option) => (
-              <option key={option} value={option}>
-                {option === "ALL" ? "ALL STATUSES" : option}
-              </option>
-            ))}
-          </select>
-          {loading && <span className="admin-loading">LOADING…</span>}
+            Registrations
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === "scanner"}
+            className={view === "scanner" ? "is-active" : ""}
+            onClick={() => setView("scanner")}
+          >
+            Check-in scanner
+          </button>
         </div>
 
-        {error && (
-          <p className="admin-error" role="alert">
-            {error}
-          </p>
-        )}
+        {view === "scanner" ? (
+          <Suspense
+            fallback={<p className="admin-loading">Loading scanner…</p>}
+          >
+            <CheckInScanner token={token} onUnauthorized={handleLogout} />
+          </Suspense>
+        ) : (
+          <>
+            <section className="admin-stats" aria-label="Registration totals">
+              <article className="admin-stat">
+                <small>TOTAL</small>
+                <strong>{total}</strong>
+              </article>
+              <article className="admin-stat">
+                <small>PENDING</small>
+                <strong>{summary.PENDING}</strong>
+              </article>
+              <article className="admin-stat">
+                <small>SUCCESS</small>
+                <strong>{summary.SUCCESS}</strong>
+              </article>
+              <article className="admin-stat">
+                <small>FAILED</small>
+                <strong>{summary.FAILED}</strong>
+              </article>
+              <article className="admin-stat">
+                <small>CHECKED IN</small>
+                <strong>
+                  {checkInSummary.checkedIn} / {checkInSummary.total}
+                </strong>
+              </article>
+            </section>
 
-        {groups.map((group, index) => (
-          <PassSection
-            key={`${group.eventTitle}|${group.passTitle}`}
-            eventTitle={group.eventTitle}
-            passTitle={group.passTitle}
-            index={index + 1}
-            records={group.records}
-            updatingId={updatingId}
-            onUpdateStatus={(id, nextStatus) =>
-              void updateStatus(id, nextStatus)
-            }
-          />
-        ))}
+            <div className="admin-toolbar">
+              <input
+                type="search"
+                placeholder="Search team, leader, member, mail, mobile, short code…"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                aria-label="Search registrations"
+              />
+              <select
+                value={status}
+                onChange={(event) =>
+                  setStatus(event.target.value as StatusFilter)
+                }
+                aria-label="Filter by payment status"
+              >
+                {STATUSES.map((option) => (
+                  <option key={option} value={option}>
+                    {option === "ALL" ? "ALL STATUSES" : option}
+                  </option>
+                ))}
+              </select>
+              {loading && <span className="admin-loading">LOADING…</span>}
+            </div>
 
-        {unassigned.length > 0 && (
-          <UnassignedSection
-            records={unassigned}
-            updatingId={updatingId}
-            onUpdateStatus={(id, nextStatus) =>
-              void updateStatus(id, nextStatus)
-            }
-          />
+            {error && (
+              <p className="admin-error" role="alert">
+                {error}
+              </p>
+            )}
+
+            {groups.map((group, index) => (
+              <PassSection
+                key={`${group.eventTitle}|${group.passTitle}`}
+                eventTitle={group.eventTitle}
+                passTitle={group.passTitle}
+                index={index + 1}
+                records={group.records}
+                updatingId={updatingId}
+                onUpdateStatus={(id, nextStatus) =>
+                  void updateStatus(id, nextStatus)
+                }
+                expandedId={expandedId}
+                onToggleRow={toggleRow}
+              />
+            ))}
+
+            {unassigned.length > 0 && (
+              <UnassignedSection
+                records={unassigned}
+                updatingId={updatingId}
+                onUpdateStatus={(id, nextStatus) =>
+                  void updateStatus(id, nextStatus)
+                }
+                expandedId={expandedId}
+                onToggleRow={toggleRow}
+              />
+            )}
+          </>
         )}
       </div>
     </main>

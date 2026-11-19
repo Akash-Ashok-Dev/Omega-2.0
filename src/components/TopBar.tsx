@@ -9,9 +9,14 @@ export function TopBar() {
         <AutobotDevice />
       </div>
       <div className="topbar__dates">{HERO.dates}</div>
-      <a className="topbar__cta" href="#contact">
-        MEET THE TEAM ↗
-      </a>
+      <div className="topbar__actions">
+        <a className="topbar__cta" href="/ticket">
+          MY TICKET
+        </a>
+        <a className="topbar__cta" href="#contact">
+          MEET THE TEAM ↗
+        </a>
+      </div>
     </header>
   );
 }

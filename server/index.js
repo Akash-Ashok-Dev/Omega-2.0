@@ -6,6 +6,14 @@ import cors from "cors";
 import express from "express";
 
 import { db } from "./db.js";
+import { sendTicketEmail } from "./mailer.js";
+import {
+  extractTicketToken,
+  eventIdForTitle,
+  normalizeScannedAt,
+  randomShortCode,
+  ticketUrlFor,
+} from "./tickets.js";
 
 const PORT = Number(process.env.PORT ?? 3001);
 const GOOGLE_FORM_URL = process.env.GOOGLE_FORM_URL ?? "https://forms.google.com/";
@@ -34,10 +42,18 @@ if (!process.env.ADMIN_TOKEN?.trim()) {
   );
 }
 
-const ALLOWED_DEPARTMENTS = new Set(["CS", "EC", "EE", "Mech", "Others"]);
 const ALLOWED_EVENTS = new Set(["Line Follower", "Maze Solver"]);
+const ALLOWED_EVENT_IDS = new Set(["line-follower", "maze-solver"]);
 const ALLOWED_PASS_TYPES = new Set(["RAS", "IEEE", "Non-IEEE"]);
 const PAYMENT_STATUSES = new Set(["PENDING", "SUCCESS", "FAILED"]);
+const MAX_TEAM_MEMBERS = 4;
+
+const REGISTRATION_SELECT = `
+  id, team_name, name, mobile_number, mail, department, college,
+  ambassador_code, event_title, pass_title, payment_status, order_id,
+  ticket_token, short_code, event_id, user_id, checked_in, checked_in_at,
+  checked_in_by, created_at
+`;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_RE = /^\d{10}$/;
@@ -45,17 +61,53 @@ const AMBASSADOR_RE = /^\d{6}$/;
 
 const insertRegistration = db.prepare(`
   INSERT INTO registrations (
-    id, name, mobile_number, mail, department, college,
-    ambassador_code, event_title, pass_title, payment_status
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
+    id, team_name, name, mobile_number, mail, department, college,
+    ambassador_code, event_title, pass_title, payment_status,
+    ticket_token, short_code, event_id, user_id
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?)
+`);
+
+const insertTeamMember = db.prepare(`
+  INSERT INTO team_members (
+    id, registration_id, position, name, mobile_number, mail, department, college
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 const selectRegistration = db.prepare(`
-  SELECT id, name, mobile_number, mail, department, college,
-         ambassador_code, event_title, pass_title, payment_status, order_id,
-         created_at
+  SELECT ${REGISTRATION_SELECT}
   FROM registrations
   WHERE id = ?
+`);
+
+const selectRegistrationByToken = db.prepare(`
+  SELECT ${REGISTRATION_SELECT}
+  FROM registrations
+  WHERE ticket_token = ?
+`);
+
+const selectRegistrationByLookup = db.prepare(`
+  SELECT ${REGISTRATION_SELECT}
+  FROM registrations
+  WHERE short_code = ? COLLATE NOCASE
+     OR id = ?
+     OR lower(mail) = lower(?)
+     OR mobile_number = ?
+     OR ticket_token = ?
+  ORDER BY created_at DESC
+  LIMIT 1
+`);
+
+const ticketExists = db.prepare(`
+  SELECT 1 FROM registrations
+  WHERE ticket_token = ? OR short_code = ?
+  LIMIT 1
+`);
+
+const selectTeamMembers = db.prepare(`
+  SELECT id, registration_id, position, name, mobile_number, mail, department, college
+  FROM team_members
+  WHERE registration_id = ?
+  ORDER BY position
 `);
 
 const updatePaymentStatus = db.prepare(`
@@ -68,14 +120,44 @@ const countByStatus = db.prepare(`
   GROUP BY payment_status
 `);
 
+const countCheckInAll = db.prepare(`
+  SELECT COUNT(*) AS total, COALESCE(SUM(checked_in), 0) AS checkedIn
+  FROM registrations
+`);
+
+const countCheckInByEvent = db.prepare(`
+  SELECT COUNT(*) AS total, COALESCE(SUM(checked_in), 0) AS checkedIn
+  FROM registrations
+  WHERE event_id = ?
+`);
+
+const markCheckedIn = db.prepare(`
+  UPDATE registrations
+  SET checked_in = 1, checked_in_at = ?, checked_in_by = ?
+  WHERE id = ? AND checked_in = 0
+`);
+
 function asString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function toPublicRegistration(row) {
+function toPublicMember(member) {
+  return {
+    id: member.id,
+    position: member.position,
+    name: member.name,
+    mobileNumber: member.mobile_number,
+    mail: member.mail,
+    department: member.department,
+    college: member.college,
+  };
+}
+
+function toPublicRegistration(row, members = []) {
   if (!row) return null;
   return {
     id: row.id,
+    teamName: row.team_name ?? "",
     name: row.name,
     mobileNumber: row.mobile_number,
     mail: row.mail,
@@ -86,48 +168,155 @@ function toPublicRegistration(row) {
     passTitle: row.pass_title,
     paymentStatus: row.payment_status,
     orderId: row.order_id ?? null,
+    ticketToken: row.ticket_token ?? "",
+    shortCode: row.short_code ?? "",
+    eventId: row.event_id ?? "",
+    userId: row.user_id ?? null,
+    checkedIn: Boolean(row.checked_in),
+    checkedInAt: row.checked_in_at ?? null,
+    checkedInBy: row.checked_in_by ?? null,
     createdAt: row.created_at,
+    members: members.map(toPublicMember),
   };
 }
 
-function validateRegistration(body) {
-  const data = {
-    name: asString(body?.name),
-    mobileNumber: asString(body?.mobileNumber ?? body?.mobile),
-    mail: asString(body?.mail ?? body?.email).toLowerCase(),
-    department: asString(body?.department),
-    college: asString(body?.college),
-    ambassadorCode: asString(body?.ambassadorCode),
-    eventTitle: asString(body?.eventTitle),
-    passTitle: asString(body?.passTitle),
+function toPublicTicket(row, req) {
+  if (!row) return null;
+  return {
+    token: row.ticket_token,
+    shortCode: row.short_code,
+    eventId: row.event_id,
+    eventTitle: row.event_title,
+    passTitle: row.pass_title,
+    teamName: row.team_name || row.name,
+    leaderName: row.name,
+    checkedIn: Boolean(row.checked_in),
+    checkedInAt: row.checked_in_at ?? null,
+    checkedInBy: row.checked_in_by ?? null,
+    ticketUrl: ticketUrlFor(req, row.ticket_token),
   };
+}
+
+function toPublicCheckInResult(row, req) {
+  const ticket = toPublicTicket(row, req);
+  if (!ticket) return null;
+  return {
+    ...ticket,
+    leaderMobile: row.mobile_number,
+    leaderMail: row.mail,
+  };
+}
+
+function createUniqueTicket() {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const token = randomUUID();
+    const shortCode = randomShortCode();
+    if (!ticketExists.get(token, shortCode)) {
+      return { token, shortCode };
+    }
+  }
+  throw new Error("Could not generate a unique ticket.");
+}
+
+function normalizeMember(value) {
+  return {
+    name: asString(value?.name),
+    mobileNumber: asString(value?.mobileNumber ?? value?.mobile ?? value?.phone),
+    mail: asString(value?.mail ?? value?.email).toLowerCase(),
+    department: asString(value?.department),
+    college: asString(value?.college),
+  };
+}
+
+function validateMember(member, index, errors) {
+  const prefix = `members[${index}]`;
+
+  if (!member.name || member.name.length > 255) {
+    errors[`${prefix}.name`] =
+      `Team member ${index + 1} name is required (max 255 characters).`;
+  }
+  if (!MOBILE_RE.test(member.mobileNumber)) {
+    errors[`${prefix}.mobileNumber`] =
+      `Team member ${index + 1} mobile number must be exactly 10 digits.`;
+  }
+  if (!EMAIL_RE.test(member.mail) || member.mail.length > 255) {
+    errors[`${prefix}.mail`] =
+      `Team member ${index + 1} needs a valid email address.`;
+  }
+  if (!member.department || member.department.length > 255) {
+    errors[`${prefix}.department`] =
+      `Team member ${index + 1} department is required (max 255 characters).`;
+  }
+  if (!member.college || member.college.length > 255) {
+    errors[`${prefix}.college`] =
+      `Team member ${index + 1} college is required (max 255 characters).`;
+  }
+}
+
+function validateRegistration(body) {
+  const teamName = asString(body?.teamName);
+  const ambassadorCode = asString(body?.ambassadorCode);
+  const eventTitle = asString(body?.eventTitle);
+  const passTitle = asString(body?.passTitle);
+  const rawMembers = Array.isArray(body?.members) ? body.members : [];
 
   const errors = {};
+  const members = [];
 
-  if (!data.name || data.name.length > 255) {
-    errors.name = "Name is required (max 255 characters).";
+  if (!teamName || teamName.length > 255) {
+    errors.teamName = "Team name is required (max 255 characters).";
   }
-  if (!MOBILE_RE.test(data.mobileNumber)) {
-    errors.mobileNumber = "Mobile number must be exactly 10 digits.";
-  }
-  if (!EMAIL_RE.test(data.mail) || data.mail.length > 255) {
-    errors.mail = "A valid email address is required.";
-  }
-  if (!ALLOWED_DEPARTMENTS.has(data.department)) {
-    errors.department = "Select a valid department.";
-  }
-  if (!data.college || data.college.length > 255) {
-    errors.college = "College is required (max 255 characters).";
-  }
-  if (data.ambassadorCode && !AMBASSADOR_RE.test(data.ambassadorCode)) {
+  if (ambassadorCode && !AMBASSADOR_RE.test(ambassadorCode)) {
     errors.ambassadorCode = "Ambassador code must be exactly 6 digits.";
   }
-  if (!ALLOWED_EVENTS.has(data.eventTitle)) {
+  if (!ALLOWED_EVENTS.has(eventTitle)) {
     errors.eventTitle = "Select a valid event.";
   }
-  if (!ALLOWED_PASS_TYPES.has(data.passTitle)) {
+  if (!ALLOWED_PASS_TYPES.has(passTitle)) {
     errors.passTitle = "Select a valid pass type.";
   }
+
+  if (rawMembers.length === 0) {
+    errors.members = "Add at least the team leader (member 1).";
+  } else if (rawMembers.length > MAX_TEAM_MEMBERS) {
+    errors.members = `A team can have at most ${MAX_TEAM_MEMBERS} members.`;
+  } else {
+    rawMembers.forEach((rawMember, index) => {
+      const member = normalizeMember(rawMember);
+      const provided = Boolean(
+        member.name ||
+          member.mobileNumber ||
+          member.mail ||
+          member.department ||
+          member.college,
+      );
+
+      if (index === 0 && !provided) {
+        errors["members[0].name"] = "Team member 1 (leader) is required.";
+        return;
+      }
+      if (index > 0 && !provided) {
+        return;
+      }
+
+      members.push({ ...member, position: index + 1 });
+      validateMember(member, index, errors);
+    });
+  }
+
+  const leader = members.find((member) => member.position === 1);
+  const data = {
+    teamName,
+    members,
+    name: leader?.name ?? "",
+    mobileNumber: leader?.mobileNumber ?? "",
+    mail: leader?.mail ?? "",
+    department: leader?.department ?? "",
+    college: leader?.college ?? "",
+    ambassadorCode,
+    eventTitle,
+    passTitle,
+  };
 
   return { data, errors };
 }
@@ -172,6 +361,12 @@ const loginRateLimit = createRateLimit(
   5,
   15 * 60 * 1000,
   "Too many login attempts. Please try again later.",
+);
+
+const ticketLookupRateLimit = createRateLimit(
+  60,
+  60 * 1000,
+  "Too many ticket lookups. Please try again later.",
 );
 
 function safeEqual(value, expected) {
@@ -257,7 +452,7 @@ app.post("/api/admin/login", loginRateLimit, (req, res) => {
   return res.json({ token: ADMIN_TOKEN });
 });
 
-app.post("/api/register", registerRateLimit, (req, res) => {
+app.post("/api/register", registerRateLimit, async (req, res) => {
   const { data, errors } = validateRegistration(req.body);
 
   if (Object.keys(errors).length > 0) {
@@ -268,10 +463,15 @@ app.post("/api/register", registerRateLimit, (req, res) => {
   }
 
   const id = randomUUID();
+  const eventId = eventIdForTitle(data.eventTitle);
+  let ticket;
 
   try {
+    ticket = createUniqueTicket();
+    db.exec("BEGIN");
     insertRegistration.run(
       id,
+      data.teamName,
       data.name,
       data.mobileNumber,
       data.mail,
@@ -280,24 +480,236 @@ app.post("/api/register", registerRateLimit, (req, res) => {
       data.ambassadorCode || null,
       data.eventTitle,
       data.passTitle,
+      ticket.token,
+      ticket.shortCode,
+      eventId,
+      data.mail,
     );
+    for (const member of data.members) {
+      insertTeamMember.run(
+        randomUUID(),
+        id,
+        member.position,
+        member.name,
+        member.mobileNumber,
+        member.mail,
+        member.department,
+        member.college,
+      );
+    }
+    db.exec("COMMIT");
   } catch (error) {
+    try {
+      db.exec("ROLLBACK");
+    } catch (rollbackError) {
+      console.error("Failed to roll back registration:", rollbackError);
+    }
     console.error("Failed to save registration:", error);
     return res.status(500).json({
       error: "Could not save your registration. Please try again.",
     });
   }
 
+  const ticketUrl = ticketUrlFor(req, ticket.token);
+
+  let emailSent = false;
+  try {
+    emailSent = await sendTicketEmail({
+      to: data.mail,
+      ticket: {
+        token: ticket.token,
+        shortCode: ticket.shortCode,
+        url: ticketUrl,
+      },
+      registration: {
+        teamName: data.teamName,
+        name: data.name,
+        eventTitle: data.eventTitle,
+        passTitle: data.passTitle,
+      },
+    });
+  } catch (error) {
+    console.error("Ticket email failed:", error);
+  }
+
   return res.status(201).json({
     id,
     paymentStatus: "PENDING",
     googleFormUrl: googleFormUrlFor(data.eventTitle, data.passTitle),
+    emailSent,
     registration: {
+      teamName: data.teamName,
       name: data.name,
       mail: data.mail,
       eventTitle: data.eventTitle,
       passTitle: data.passTitle,
+      memberCount: data.members.length,
+      ticketToken: ticket.token,
+      shortCode: ticket.shortCode,
+      ticketUrl,
     },
+  });
+});
+
+app.get("/api/ticket/lookup", ticketLookupRateLimit, (req, res) => {
+  const query = asString(req.query.query).slice(0, 100);
+  if (!query) {
+    return res.status(400).json({
+      error: "Enter a registration ID, short code, email, or mobile number.",
+    });
+  }
+
+  const registration = selectRegistrationByLookup.get(
+    query,
+    query,
+    query,
+    query,
+    extractTicketToken(query),
+  );
+  if (!registration) {
+    return res.status(404).json({ error: "Ticket not found." });
+  }
+
+  return res.json({ ticket: toPublicTicket(registration, req) });
+});
+
+app.get("/api/ticket/:token", ticketLookupRateLimit, (req, res) => {
+  const token = extractTicketToken(req.params.token);
+  if (!token) {
+    return res.status(400).json({ error: "Ticket token is required." });
+  }
+
+  const registration = selectRegistrationByToken.get(token);
+  if (!registration) {
+    return res.status(404).json({ error: "Ticket not found." });
+  }
+
+  return res.json({ ticket: toPublicTicket(registration, req) });
+});
+
+app.get("/api/admin/check-in/stats", (req, res) => {
+  if (!hasValidAdminToken(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
+  const eventId = asString(req.query.eventId);
+  if (eventId && !ALLOWED_EVENT_IDS.has(eventId)) {
+    return res.status(400).json({ error: "Invalid event." });
+  }
+
+  const counts = eventId
+    ? countCheckInByEvent.get(eventId)
+    : countCheckInAll.get();
+
+  return res.json({
+    total: Number(counts?.total ?? 0),
+    checkedIn: Number(counts?.checkedIn ?? 0),
+  });
+});
+
+app.get("/api/admin/check-in/search", (req, res) => {
+  if (!hasValidAdminToken(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
+  const query = asString(req.query.query).slice(0, 100);
+  if (!query) {
+    return res.json({ results: [] });
+  }
+
+  const eventId = asString(req.query.eventId);
+  if (eventId && !ALLOWED_EVENT_IDS.has(eventId)) {
+    return res.status(400).json({ error: "Invalid event." });
+  }
+
+  const like = `%${query}%`;
+  const conditions = [
+    `(team_name LIKE ? OR name LIKE ? OR mobile_number LIKE ? OR mail LIKE ?
+      OR short_code LIKE ? OR id = ?)`,
+  ];
+  const params = [like, like, like, like, like, query];
+
+  if (eventId) {
+    conditions.push("event_id = ?");
+    params.push(eventId);
+  }
+
+  const rows = db
+    .prepare(
+      `SELECT ${REGISTRATION_SELECT}
+       FROM registrations
+       WHERE ${conditions.join(" AND ")}
+       ORDER BY checked_in ASC, created_at DESC
+       LIMIT 20`,
+    )
+    .all(...params);
+
+  return res.json({
+    results: rows.map((row) => toPublicCheckInResult(row, req)),
+  });
+});
+
+app.post("/api/admin/check-in", (req, res) => {
+  if (!hasValidAdminToken(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
+  const token = extractTicketToken(req.body?.token);
+  if (!token) {
+    return res.status(400).json({ error: "Ticket token is required." });
+  }
+
+  const eventId = asString(req.body?.eventId);
+  if (!ALLOWED_EVENT_IDS.has(eventId)) {
+    return res.status(400).json({ error: "Select a valid event." });
+  }
+
+  const scannedAt = normalizeScannedAt(req.body?.scannedAt);
+  if (!scannedAt) {
+    return res.status(400).json({ error: "Invalid scan time." });
+  }
+
+  const volunteerName =
+    asString(req.body?.volunteerName).slice(0, 120) || ADMIN_USERNAME;
+
+  const registration = selectRegistrationByToken.get(token);
+  if (!registration) {
+    return res.status(404).json({
+      result: "invalid",
+      error: "Ticket not found.",
+    });
+  }
+
+  if (registration.event_id !== eventId) {
+    return res.status(409).json({
+      result: "wrong-event",
+      error: `This ticket is for ${registration.event_title}, not the selected event.`,
+      ticket: toPublicCheckInResult(registration, req),
+    });
+  }
+
+  if (registration.checked_in) {
+    return res.json({
+      result: "duplicate",
+      error: "Ticket already checked in.",
+      ticket: toPublicCheckInResult(registration, req),
+    });
+  }
+
+  const update = markCheckedIn.run(scannedAt, volunteerName, registration.id);
+  if (update.changes === 0) {
+    const current = selectRegistration.get(registration.id);
+    return res.json({
+      result: "duplicate",
+      error: "Ticket already checked in.",
+      ticket: toPublicCheckInResult(current, req),
+    });
+  }
+
+  const updated = selectRegistration.get(registration.id);
+  return res.json({
+    result: "checked-in",
+    ticket: toPublicCheckInResult(updated, req),
   });
 });
 
@@ -326,43 +738,98 @@ app.get("/api/registrations", (req, res) => {
   }
   if (search) {
     conditions.push(
-      "(name LIKE ? OR mail LIKE ? OR mobile_number LIKE ? OR college LIKE ?)",
+      `(team_name LIKE ? OR name LIKE ? OR mail LIKE ? OR mobile_number LIKE ?
+        OR department LIKE ? OR college LIKE ? OR short_code LIKE ?
+        OR ticket_token LIKE ? OR EXISTS (
+          SELECT 1 FROM team_members tm
+          WHERE tm.registration_id = registrations.id
+            AND (tm.name LIKE ? OR tm.mail LIKE ? OR tm.mobile_number LIKE ?
+                 OR tm.department LIKE ? OR tm.college LIKE ?)
+        ))`,
     );
     const like = `%${search}%`;
-    params.push(like, like, like, like);
+    params.push(
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+      like,
+    );
   }
 
   const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
   const rows = db
     .prepare(
-      `SELECT id, name, mobile_number, mail, department, college,
-              ambassador_code, event_title, pass_title, payment_status,
-              order_id, created_at
+      `SELECT ${REGISTRATION_SELECT}
        FROM registrations${where}
        ORDER BY created_at DESC, id DESC
        LIMIT ?`,
     )
     .all(...params, limit);
 
+  const memberRows = rows.length
+    ? db
+        .prepare(
+          `SELECT id, registration_id, position, name, mobile_number, mail,
+                  department, college
+           FROM team_members
+           WHERE registration_id IN (${rows.map(() => "?").join(", ")})
+           ORDER BY registration_id, position`,
+        )
+        .all(...rows.map((row) => row.id))
+    : [];
+
+  const membersByRegistration = new Map();
+  for (const member of memberRows) {
+    const list = membersByRegistration.get(member.registration_id) ?? [];
+    list.push(member);
+    membersByRegistration.set(member.registration_id, list);
+  }
+
   const summary = { PENDING: 0, SUCCESS: 0, FAILED: 0 };
   for (const row of countByStatus.all()) {
     summary[row.status] = Number(row.count);
   }
 
+  const checkInCounts = countCheckInAll.get();
+
   return res.json({
-    registrations: rows.map(toPublicRegistration),
+    registrations: rows.map((row) =>
+      toPublicRegistration(row, membersByRegistration.get(row.id) ?? []),
+    ),
     count: rows.length,
     summary,
+    checkIn: {
+      total: Number(checkInCounts?.total ?? 0),
+      checkedIn: Number(checkInCounts?.checkedIn ?? 0),
+    },
     filters: { status: status || null, search: search || null, limit },
   });
 });
 
 app.get("/api/registrations/:id", (req, res) => {
+  if (!hasValidAdminToken(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
   const registration = selectRegistration.get(req.params.id);
   if (!registration) {
     return res.status(404).json({ error: "Registration not found." });
   }
-  return res.json({ registration: toPublicRegistration(registration) });
+  return res.json({
+    registration: toPublicRegistration(
+      registration,
+      selectTeamMembers.all(registration.id),
+    ),
+  });
 });
 
 app.patch("/api/registrations/:id", (req, res) => {
@@ -383,7 +850,10 @@ app.patch("/api/registrations/:id", (req, res) => {
   }
 
   return res.json({
-    registration: toPublicRegistration(selectRegistration.get(req.params.id)),
+    registration: toPublicRegistration(
+      selectRegistration.get(req.params.id),
+      selectTeamMembers.all(req.params.id),
+    ),
   });
 });
 

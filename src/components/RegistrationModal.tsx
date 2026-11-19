@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { QRCodeSVG } from "qrcode.react";
 
 type RegistrationModalProps = {
   eventTitle: string;
@@ -10,17 +11,48 @@ type RegistrationResponse = {
   id: string;
   paymentStatus: string;
   googleFormUrl: string;
+  emailSent?: boolean;
   registration: {
+    teamName: string;
     name: string;
     mail: string;
     eventTitle: string;
     passTitle: string;
+    memberCount: number;
+    ticketToken: string;
+    shortCode: string;
+    ticketUrl: string;
   };
 };
 
 type Phase = "form" | "submitting" | "success" | "error";
 
-const DEPARTMENTS = ["CS", "EC", "EE", "Mech", "Others"] as const;
+type MemberField =
+  | "name"
+  | "mobileNumber"
+  | "mail"
+  | "department"
+  | "college";
+type MemberInput = Record<MemberField, string>;
+
+const TEAM_SIZE = 4;
+const EMPTY_MEMBER: MemberInput = {
+  name: "",
+  mobileNumber: "",
+  mail: "",
+  department: "",
+  college: "",
+};
+
+function memberHasContent(member: MemberInput) {
+  return Boolean(
+    member.name.trim() ||
+      member.mobileNumber.trim() ||
+      member.mail.trim() ||
+      member.department.trim() ||
+      member.college.trim(),
+  );
+}
 
 export function RegistrationModal({
   eventTitle,
@@ -32,8 +64,10 @@ export function RegistrationModal({
   const [phase, setPhase] = useState<Phase>("form");
   const [error, setError] = useState("");
   const [result, setResult] = useState<RegistrationResponse | null>(null);
-  const [department, setDepartment] = useState("");
-  const [departmentOpen, setDepartmentOpen] = useState(false);
+  const [teamName, setTeamName] = useState("");
+  const [members, setMembers] = useState<MemberInput[]>(() =>
+    Array.from({ length: TEAM_SIZE }, () => ({ ...EMPTY_MEMBER })),
+  );
 
   const isSubmitting = phase === "submitting";
   const isComplete = phase === "success";
@@ -77,25 +111,30 @@ export function RegistrationModal({
     };
   }, [onClose]);
 
+  function updateMember(index: number, field: MemberField, value: string) {
+    setMembers((current) =>
+      current.map((member, memberIndex) =>
+        memberIndex === index ? { ...member, [field]: value } : member,
+      ),
+    );
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (fieldsDisabled) return;
 
     setError("");
 
-    if (!department) {
-      setError("Select your department before continuing.");
-      setDepartmentOpen(true);
-      return;
-    }
-
     const formData = new FormData(event.currentTarget);
     const payload = {
-      name: String(formData.get("name") ?? "").trim(),
-      mobile: String(formData.get("mobile") ?? "").trim(),
-      email: String(formData.get("email") ?? "").trim(),
-      department,
-      college: String(formData.get("college") ?? "").trim(),
+      teamName: teamName.trim(),
+      members: members.map((member) => ({
+        name: member.name.trim(),
+        mobileNumber: member.mobileNumber.trim(),
+        mail: member.mail.trim(),
+        department: member.department.trim(),
+        college: member.college.trim(),
+      })),
       ambassadorCode: String(formData.get("ambassadorCode") ?? "").trim(),
       eventTitle,
       passTitle,
@@ -124,8 +163,20 @@ export function RegistrationModal({
         );
       }
 
-      setResult(body as RegistrationResponse);
+      const next = body as RegistrationResponse;
+      setResult(next);
       setPhase("success");
+
+      if (next.registration.ticketToken) {
+        try {
+          localStorage.setItem(
+            "omega-ticket-token",
+            next.registration.ticketToken,
+          );
+        } catch {
+          return;
+        }
+      }
     } catch (caught) {
       setPhase("error");
       setError(
@@ -170,14 +221,62 @@ export function RegistrationModal({
             <p className="eyebrow">
               REGISTRATION / {eventTitle} / {passTitle}
             </p>
-            <h2 id="registration-modal-title">Secure your pass.</h2>
+            <h2 id="registration-modal-title">
+              {result ? "Ticket ready." : "Secure your pass."}
+            </h2>
             {!result && (
               <p>
-                Enter your details below. Every required field must be complete
-                before you continue.
+                Enter your team name and member details below. Member 1 is the
+                team leader; members 2–4 are optional. Every required field must
+                be complete before you continue.
               </p>
             )}
           </div>
+
+          {result && (
+            <div className="registration-modal__ticket">
+              <div className="registration-modal__ticket-qr">
+                <QRCodeSVG
+                  value={result.registration.ticketToken}
+                  size={220}
+                  level="M"
+                  bgColor="#ffffff"
+                  fgColor="#000000"
+                  marginSize={2}
+                  title={`Omega 2.0 ticket for ${result.registration.teamName}`}
+                />
+              </div>
+              <div className="registration-modal__ticket-details">
+                <p className="eyebrow">
+                  E-TICKET / {result.registration.eventTitle}
+                </p>
+                <h3>{result.registration.teamName}</h3>
+                <p className="registration-modal__ref">
+                  LEADER: {result.registration.name}
+                </p>
+                <p className="registration-modal__short-code">
+                  {result.registration.shortCode}
+                </p>
+                <p className="registration-modal__ticket-note">
+                  Turn your screen brightness up when the volunteer scans this
+                  code. If scanning fails, read out the short code.
+                </p>
+                <a
+                  className="registration-modal__ticket-link"
+                  href={result.registration.ticketUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open ticket page ↗
+                </a>
+                <p className="registration-modal__ticket-note">
+                  {result.emailSent
+                    ? `Ticket emailed to ${result.registration.mail}.`
+                    : "Email delivery is unavailable. Save this ticket or use the link below."}
+                </p>
+              </div>
+            </div>
+          )}
 
           {result && (
             <div className="registration-modal__payment">
@@ -192,6 +291,9 @@ export function RegistrationModal({
                   Form and finish the payment.
                   Keep your registration ID safe — you will need it for
                   verification.
+                </p>
+                <p className="registration-modal__ref">
+                  TEAM: {result.registration.teamName}
                 </p>
                 <p className="registration-modal__ref">ID: {result.id}</p>
                 <p className="registration-modal__ref">
@@ -209,129 +311,132 @@ export function RegistrationModal({
           {!result && (
             <>
               <form className="registration-form" onSubmit={handleSubmit}>
-                <label>
-                  Name
+                <label className="registration-form__team-name">
+                  Team name
                   <input
-                    name="name"
                     type="text"
-                    required
-                    autoComplete="name"
-                    disabled={fieldsDisabled}
-                  />
-                </label>
-                <label>
-                  Mobile number
-                  <input
-                    name="mobile"
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]{10}"
-                    maxLength={10}
-                    required
-                    title="Enter a 10 digit mobile number"
-                    autoComplete="tel"
-                    disabled={fieldsDisabled}
-                  />
-                </label>
-                <label>
-                  Mail
-                  <input
-                    name="email"
-                    type="email"
-                    pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
-                    required
-                    title="Use a Gmail address ending in @gmail.com"
-                    autoComplete="email"
-                    disabled={fieldsDisabled}
-                  />
-                </label>
-                <label>
-                  Department
-                  <span className="registration-select">
-                    <input
-                      className="registration-select__value"
-                      name="department"
-                      value={department}
-                      required
-                      readOnly
-                      tabIndex={-1}
-                      aria-hidden="true"
-                    />
-                    <button
-                      className={`registration-select__trigger${
-                        department ? " has-value" : ""
-                      }`}
-                      type="button"
-                      aria-haspopup="listbox"
-                      aria-expanded={departmentOpen}
-                      disabled={fieldsDisabled}
-                      onClick={() => setDepartmentOpen((open) => !open)}
-                      onKeyDown={(event) => {
-                        if (
-                          event.key === "ArrowDown" ||
-                          event.key === "Enter"
-                        ) {
-                          event.preventDefault();
-                          setDepartmentOpen(true);
-                        }
-                        if (event.key === "Escape") setDepartmentOpen(false);
-                      }}
-                    >
-                      <span>{department || "Select department"}</span>
-                      <span
-                        className="registration-select__arrow"
-                        aria-hidden="true"
-                      >
-                        {departmentOpen ? "⌃" : "⌄"}
-                      </span>
-                    </button>
-                    {departmentOpen && !fieldsDisabled && (
-                      <span
-                        className="registration-select__menu"
-                        role="listbox"
-                      >
-                        <span className="registration-select__hint">
-                          SELECT YOUR UNIT
-                        </span>
-                        {DEPARTMENTS.map((option) => (
-                          <button
-                            className={`registration-select__option${
-                              department === option ? " is-selected" : ""
-                            }`}
-                            type="button"
-                            role="option"
-                            aria-selected={department === option}
-                            key={option}
-                            onClick={() => {
-                              setDepartment(option);
-                              setDepartmentOpen(false);
-                            }}
-                          >
-                            <span className="registration-select__option-index">
-                              {String(
-                                DEPARTMENTS.indexOf(option) + 1,
-                              ).padStart(2, "0")}
-                            </span>
-                            {option}
-                            {department === option && (
-                              <span aria-hidden="true">✓</span>
-                            )}
-                          </button>
-                        ))}
-                      </span>
-                    )}
-                  </span>
-                </label>
-                <label>
-                  College
-                  <input
-                    name="college"
-                    type="text"
+                    value={teamName}
+                    onChange={(event) => setTeamName(event.target.value)}
+                    maxLength={255}
                     required
                     autoComplete="organization"
+                    placeholder="Your team name"
                     disabled={fieldsDisabled}
                   />
                 </label>
+
+                {members.map((member, index) => {
+                  const isLeader = index === 0;
+                  const isRequired = isLeader || memberHasContent(member);
+
+                  return (
+                    <fieldset
+                      className={`registration-team-member${
+                        isLeader ? " registration-team-member--leader" : ""
+                      }`}
+                      key={index}
+                    >
+                      <legend>
+                        {isLeader
+                          ? "Team leader / Member 1"
+                          : `Team member ${index + 1}`}
+                        <span>{isLeader ? "required" : "optional"}</span>
+                      </legend>
+                      {!isLeader && (
+                        <p className="registration-team-member__hint">
+                          Leave blank if this member is not participating. If
+                          any field is filled, all fields are required.
+                        </p>
+                      )}
+                      <div className="registration-team-member__fields">
+                        <label className="registration-team-member__field--third">
+                          Name
+                          <input
+                            type="text"
+                            value={member.name}
+                            onChange={(event) =>
+                              updateMember(index, "name", event.target.value)
+                            }
+                            maxLength={255}
+                            required={isRequired}
+                            autoComplete={isLeader ? "name" : "off"}
+                            disabled={fieldsDisabled}
+                          />
+                        </label>
+                        <label className="registration-team-member__field--third">
+                          Mobile number
+                          <input
+                            type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]{10}"
+                            maxLength={10}
+                            value={member.mobileNumber}
+                            onChange={(event) =>
+                              updateMember(
+                                index,
+                                "mobileNumber",
+                                event.target.value,
+                              )
+                            }
+                            required={isRequired}
+                            title="Enter a 10 digit mobile number"
+                            autoComplete={isLeader ? "tel" : "off"}
+                            disabled={fieldsDisabled}
+                          />
+                        </label>
+                        <label className="registration-team-member__field--third">
+                          Mail
+                          <input
+                            type="email"
+                            pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
+                            maxLength={255}
+                            value={member.mail}
+                            onChange={(event) =>
+                              updateMember(index, "mail", event.target.value)
+                            }
+                            required={isRequired}
+                            title="Use a Gmail address ending in @gmail.com"
+                            autoComplete={isLeader ? "email" : "off"}
+                            disabled={fieldsDisabled}
+                          />
+                        </label>
+                        <label className="registration-team-member__field--half">
+                          Department
+                          <input
+                            type="text"
+                            value={member.department}
+                            onChange={(event) =>
+                              updateMember(
+                                index,
+                                "department",
+                                event.target.value,
+                              )
+                            }
+                            maxLength={255}
+                            required={isRequired}
+                            autoComplete="off"
+                            disabled={fieldsDisabled}
+                          />
+                        </label>
+                        <label className="registration-team-member__field--half">
+                          College
+                          <input
+                            type="text"
+                            value={member.college}
+                            onChange={(event) =>
+                              updateMember(index, "college", event.target.value)
+                            }
+                            maxLength={255}
+                            required={isRequired}
+                            autoComplete={isLeader ? "organization" : "off"}
+                            disabled={fieldsDisabled}
+                          />
+                        </label>
+                      </div>
+                    </fieldset>
+                  );
+                })}
+
                 <label>
                   Ambassador code <span>(optional)</span>
                   <input
