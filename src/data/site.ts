@@ -294,7 +294,7 @@ export const TEAM: readonly TeamMember[] = [
     name: "Fidha",
     role: "Publicity Head",
     email: "fidhafathimatj@gmail.com",
-    phone: "+91 98470 55667",
+    phone: "+91 94960 06584",
   },
   {
     name: "Akash Ashok",
