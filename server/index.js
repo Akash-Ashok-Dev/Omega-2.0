@@ -83,16 +83,19 @@ const selectRegistrationByToken = db.prepare(`
   SELECT ${REGISTRATION_SELECT}
   FROM registrations
   WHERE ticket_token = ?
+    AND payment_status = 'SUCCESS'
 `);
 
 const selectRegistrationByLookup = db.prepare(`
   SELECT ${REGISTRATION_SELECT}
   FROM registrations
-  WHERE short_code = ? COLLATE NOCASE
-     OR id = ?
-     OR lower(mail) = lower(?)
-     OR mobile_number = ?
-     OR ticket_token = ?
+  WHERE payment_status = 'SUCCESS'
+    AND ticket_token IS NOT NULL
+    AND (short_code = ? COLLATE NOCASE
+      OR id = ?
+      OR lower(mail) = lower(?)
+      OR mobile_number = ?
+      OR ticket_token = ?)
   ORDER BY created_at DESC
   LIMIT 1
 `);
@@ -114,6 +117,12 @@ const updatePaymentStatus = db.prepare(`
   UPDATE registrations SET payment_status = ? WHERE id = ?
 `);
 
+const issueTicket = db.prepare(`
+  UPDATE registrations
+  SET ticket_token = ?, short_code = ?
+  WHERE id = ? AND ticket_token IS NULL
+`);
+
 const countByStatus = db.prepare(`
   SELECT payment_status AS status, COUNT(*) AS count
   FROM registrations
@@ -123,12 +132,14 @@ const countByStatus = db.prepare(`
 const countCheckInAll = db.prepare(`
   SELECT COUNT(*) AS total, COALESCE(SUM(checked_in), 0) AS checkedIn
   FROM registrations
+  WHERE payment_status = 'SUCCESS' AND ticket_token IS NOT NULL
 `);
 
 const countCheckInByEvent = db.prepare(`
   SELECT COUNT(*) AS total, COALESCE(SUM(checked_in), 0) AS checkedIn
   FROM registrations
-  WHERE event_id = ?
+  WHERE payment_status = 'SUCCESS' AND ticket_token IS NOT NULL
+    AND event_id = ?
 `);
 
 const markCheckedIn = db.prepare(`
@@ -454,7 +465,7 @@ app.post("/api/admin/login", loginRateLimit, (req, res) => {
   return res.json({ token: ADMIN_TOKEN });
 });
 
-app.post("/api/register", registerRateLimit, async (req, res) => {
+app.post("/api/register", registerRateLimit, (req, res) => {
   const { data, errors } = validateRegistration(req.body);
 
   if (Object.keys(errors).length > 0) {
@@ -466,10 +477,8 @@ app.post("/api/register", registerRateLimit, async (req, res) => {
 
   const id = randomUUID();
   const eventId = eventIdForTitle(data.eventTitle);
-  let ticket;
 
   try {
-    ticket = createUniqueTicket();
     db.exec("BEGIN");
     insertRegistration.run(
       id,
@@ -482,8 +491,8 @@ app.post("/api/register", registerRateLimit, async (req, res) => {
       data.ambassadorCode || null,
       data.eventTitle,
       data.passTitle,
-      ticket.token,
-      ticket.shortCode,
+      null,
+      null,
       eventId,
       data.mail,
     );
@@ -512,33 +521,10 @@ app.post("/api/register", registerRateLimit, async (req, res) => {
     });
   }
 
-  const ticketUrl = ticketUrlFor(req, ticket.token);
-
-  let emailSent = false;
-  try {
-    emailSent = await sendTicketEmail({
-      to: data.mail,
-      ticket: {
-        token: ticket.token,
-        shortCode: ticket.shortCode,
-        url: ticketUrl,
-      },
-      registration: {
-        teamName: data.teamName,
-        name: data.name,
-        eventTitle: data.eventTitle,
-        passTitle: data.passTitle,
-      },
-    });
-  } catch (error) {
-    console.error("Ticket email failed:", error);
-  }
-
   return res.status(201).json({
     id,
     paymentStatus: "PENDING",
     googleFormUrl: googleFormUrlFor(data.eventTitle, data.passTitle),
-    emailSent,
     registration: {
       teamName: data.teamName,
       name: data.name,
@@ -546,9 +532,6 @@ app.post("/api/register", registerRateLimit, async (req, res) => {
       eventTitle: data.eventTitle,
       passTitle: data.passTitle,
       memberCount: data.members.length,
-      ticketToken: ticket.token,
-      shortCode: ticket.shortCode,
-      ticketUrl,
     },
   });
 });
@@ -569,7 +552,9 @@ app.get("/api/ticket/lookup", ticketLookupRateLimit, (req, res) => {
     extractTicketToken(query),
   );
   if (!registration) {
-    return res.status(404).json({ error: "Ticket not found." });
+    return res
+      .status(404)
+      .json({ error: "Ticket not found or not confirmed yet." });
   }
 
   return res.json({ ticket: toPublicTicket(registration, req) });
@@ -583,7 +568,9 @@ app.get("/api/ticket/:token", ticketLookupRateLimit, (req, res) => {
 
   const registration = selectRegistrationByToken.get(token);
   if (!registration) {
-    return res.status(404).json({ error: "Ticket not found." });
+    return res
+      .status(404)
+      .json({ error: "Ticket not found or not confirmed yet." });
   }
 
   return res.json({ ticket: toPublicTicket(registration, req) });
@@ -626,6 +613,8 @@ app.get("/api/admin/check-in/search", (req, res) => {
 
   const like = `%${query}%`;
   const conditions = [
+    "payment_status = 'SUCCESS'",
+    "ticket_token IS NOT NULL",
     `(team_name LIKE ? OR name LIKE ? OR mobile_number LIKE ? OR mail LIKE ?
       OR short_code LIKE ? OR id = ?)`,
   ];
@@ -834,7 +823,7 @@ app.get("/api/registrations/:id", (req, res) => {
   });
 });
 
-app.patch("/api/registrations/:id", (req, res) => {
+app.patch("/api/registrations/:id", async (req, res) => {
   if (!hasValidAdminToken(req)) {
     return res.status(401).json({ error: "Unauthorized." });
   }
@@ -846,9 +835,60 @@ app.patch("/api/registrations/:id", (req, res) => {
     });
   }
 
-  const result = updatePaymentStatus.run(paymentStatus, req.params.id);
-  if (result.changes === 0) {
+  const current = selectRegistration.get(req.params.id);
+  if (!current) {
     return res.status(404).json({ error: "Registration not found." });
+  }
+
+  let ticket = null;
+  try {
+    db.exec("BEGIN");
+    if (paymentStatus === "SUCCESS" && !current.ticket_token) {
+      ticket = createUniqueTicket();
+      const issued = issueTicket.run(
+        ticket.token,
+        ticket.shortCode,
+        req.params.id,
+      );
+      if (issued.changes === 0) {
+        throw new Error("Could not issue ticket for this registration.");
+      }
+    }
+    updatePaymentStatus.run(paymentStatus, req.params.id);
+    db.exec("COMMIT");
+  } catch (error) {
+    try {
+      db.exec("ROLLBACK");
+    } catch (rollbackError) {
+      console.error("Failed to roll back confirmation:", rollbackError);
+    }
+    console.error("Failed to confirm registration:", error);
+    return res.status(500).json({
+      error: "Could not confirm this registration. Please try again.",
+    });
+  }
+
+  let emailSent = false;
+  if (ticket) {
+    const ticketUrl = ticketUrlFor(req, ticket.token);
+    try {
+      emailSent = await sendTicketEmail({
+        to: current.mail,
+        ticket: {
+          token: ticket.token,
+          shortCode: ticket.shortCode,
+          url: ticketUrl,
+        },
+        registration: {
+          teamName: current.team_name,
+          name: current.name,
+          eventTitle: current.event_title,
+          passTitle: current.pass_title,
+        },
+      });
+    } catch (error) {
+      console.error("Ticket email failed:", error);
+    }
   }
 
   return res.json({
@@ -856,6 +896,8 @@ app.patch("/api/registrations/:id", (req, res) => {
       selectRegistration.get(req.params.id),
       selectTeamMembers.all(req.params.id),
     ),
+    ticketIssued: Boolean(ticket),
+    emailSent,
   });
 });
 

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { QRCodeSVG } from "qrcode.react";
 
 import { apiUrl } from "@/lib/api";
 
@@ -13,7 +12,6 @@ type RegistrationResponse = {
   id: string;
   paymentStatus: string;
   googleFormUrl: string;
-  emailSent?: boolean;
   registration: {
     teamName: string;
     name: string;
@@ -21,9 +19,6 @@ type RegistrationResponse = {
     eventTitle: string;
     passTitle: string;
     memberCount: number;
-    ticketToken: string;
-    shortCode: string;
-    ticketUrl: string;
   };
 };
 
@@ -168,17 +163,6 @@ export function RegistrationModal({
       const next = body as RegistrationResponse;
       setResult(next);
       setPhase("success");
-
-      if (next.registration.ticketToken) {
-        try {
-          localStorage.setItem(
-            "omega-ticket-token",
-            next.registration.ticketToken,
-          );
-        } catch {
-          return;
-        }
-      }
     } catch (caught) {
       setPhase("error");
       setError(
@@ -224,7 +208,7 @@ export function RegistrationModal({
               REGISTRATION / {eventTitle} / {passTitle}
             </p>
             <h2 id="registration-modal-title">
-              {result ? "Ticket ready." : "Secure your pass."}
+              {result ? "Registration received." : "Secure your pass."}
             </h2>
             {!result && (
               <p>
@@ -236,51 +220,6 @@ export function RegistrationModal({
           </div>
 
           {result && (
-            <div className="registration-modal__ticket">
-              <div className="registration-modal__ticket-qr">
-                <QRCodeSVG
-                  value={result.registration.ticketToken}
-                  size={220}
-                  level="M"
-                  bgColor="#ffffff"
-                  fgColor="#000000"
-                  marginSize={2}
-                  title={`Omega 2.0 ticket for ${result.registration.teamName}`}
-                />
-              </div>
-              <div className="registration-modal__ticket-details">
-                <p className="eyebrow">
-                  E-TICKET / {result.registration.eventTitle}
-                </p>
-                <h3>{result.registration.teamName}</h3>
-                <p className="registration-modal__ref">
-                  LEADER: {result.registration.name}
-                </p>
-                <p className="registration-modal__short-code">
-                  {result.registration.shortCode}
-                </p>
-                <p className="registration-modal__ticket-note">
-                  Turn your screen brightness up when the volunteer scans this
-                  code. If scanning fails, read out the short code.
-                </p>
-                <a
-                  className="registration-modal__ticket-link"
-                  href={result.registration.ticketUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open ticket page ↗
-                </a>
-                <p className="registration-modal__ticket-note">
-                  {result.emailSent
-                    ? `Ticket emailed to ${result.registration.mail}.`
-                    : "Email delivery is unavailable. Save this ticket or use the link below."}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {result && (
             <div className="registration-modal__payment">
               <div className="registration-modal__payment-details">
                 <p className="eyebrow">
@@ -288,9 +227,10 @@ export function RegistrationModal({
                   {result.registration.passTitle}
                 </p>
                 <p>
-                  Open the Google Form to complete your payment.
-                  Your pass will only be confirmed after you visit the Google
-                  Form and finish the payment.
+                  Open the Google Form to complete your payment. Your pass will
+                  be confirmed after the organizers verify your payment. Once
+                  confirmed, the ticket QR will be emailed to you and available
+                  on the ticket page.
                   Keep your registration ID safe — you will need it for
                   verification.
                 </p>

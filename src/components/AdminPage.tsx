@@ -244,6 +244,11 @@ function StatusGroup({
                             <button
                               key={option}
                               type="button"
+                              title={
+                                option === "SUCCESS"
+                                  ? "Confirm payment and issue ticket"
+                                  : undefined
+                              }
                               disabled={updatingId === record.id}
                               onClick={() => onUpdateStatus(record.id, option)}
                             >
@@ -271,6 +276,11 @@ function StatusGroup({
                                   : ""}
                               </p>
                             )}
+                            <p className="admin-team-details__checkin">
+                              {record.ticketToken
+                                ? `TICKET ISSUED / ${record.shortCode}`
+                                : "TICKET PENDING CONFIRMATION"}
+                            </p>
                             <ul>
                               {members.map((member) => (
                                 <li key={member.id}>
@@ -473,6 +483,7 @@ export function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -491,6 +502,7 @@ export function AdminPage() {
 
     setLoading(true);
     setError("");
+    setNotice("");
 
     try {
       const params = new URLSearchParams();
@@ -543,6 +555,7 @@ export function AdminPage() {
     if (loggingIn) return;
 
     setError("");
+    setNotice("");
     setLoggingIn(true);
 
     try {
@@ -578,6 +591,7 @@ export function AdminPage() {
     setCheckInSummary(EMPTY_CHECK_IN);
     setView("registrations");
     setError("");
+    setNotice("");
     setExpandedId(null);
   }
 
@@ -622,8 +636,16 @@ export function AdminPage() {
   }
 
   async function updateStatus(id: string, nextStatus: PaymentStatus) {
+    if (
+      nextStatus === "SUCCESS" &&
+      !window.confirm("Confirm this payment and issue the ticket?")
+    ) {
+      return;
+    }
+
     setUpdatingId(id);
     setError("");
+    setNotice("");
 
     try {
       const response = await fetch(apiUrl(`/api/registrations/${id}`), {
@@ -649,6 +671,13 @@ export function AdminPage() {
       setRecords((current) =>
         current.map((record) => (record.id === id ? updated : record)),
       );
+      if (body?.ticketIssued) {
+        setNotice(
+          body.emailSent
+            ? "Ticket issued and emailed."
+            : "Ticket issued, but email delivery failed.",
+        );
+      }
       void refresh();
     } catch (caught) {
       setError(
@@ -838,6 +867,12 @@ export function AdminPage() {
             {error && (
               <p className="admin-error" role="alert">
                 {error}
+              </p>
+            )}
+
+            {notice && (
+              <p className="admin-notice" role="status">
+                {notice}
               </p>
             )}
 
