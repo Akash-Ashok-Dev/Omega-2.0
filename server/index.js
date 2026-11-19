@@ -406,6 +406,8 @@ app.use(
       }
       return callback(null, false);
     },
+    methods: ["GET", "POST", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "x-admin-token"],
   }),
 );
 

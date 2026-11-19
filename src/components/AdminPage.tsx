@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { EVENTS, PASSES_TYPE } from "@/data/site";
+import { apiUrl } from "@/lib/api";
 import { formatTicketDate } from "@/lib/tickets";
 
 const CheckInScanner = lazy(() => import("@/components/CheckInScanner"));
@@ -496,9 +497,12 @@ export function AdminPage() {
       if (status !== "ALL") params.set("status", status);
       if (search.trim()) params.set("search", search.trim());
 
-      const response = await fetch(`/api/registrations?${params.toString()}`, {
-        headers: { "x-admin-token": token },
-      });
+      const response = await fetch(
+        apiUrl(`/api/registrations?${params.toString()}`),
+        {
+          headers: { "x-admin-token": token },
+        },
+      );
       const body = await response.json().catch(() => null);
 
       if (response.status === 401) {
@@ -542,7 +546,7 @@ export function AdminPage() {
     setLoggingIn(true);
 
     try {
-      const response = await fetch("/api/admin/login", {
+      const response = await fetch(apiUrl("/api/admin/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -585,7 +589,7 @@ export function AdminPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/admin/backup", {
+      const response = await fetch(apiUrl("/api/admin/backup"), {
         headers: { "x-admin-token": token },
       });
 
@@ -622,7 +626,7 @@ export function AdminPage() {
     setError("");
 
     try {
-      const response = await fetch(`/api/registrations/${id}`, {
+      const response = await fetch(apiUrl(`/api/registrations/${id}`), {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

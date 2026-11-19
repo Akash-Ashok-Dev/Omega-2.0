@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
+import { apiUrl } from "@/lib/api";
 import {
   formatTicketDate,
   type Ticket,
@@ -57,7 +58,7 @@ export function TicketPage({ token = "" }: TicketPageProps) {
 
       try {
         const response = await fetch(
-          `/api/ticket/${encodeURIComponent(value)}`,
+          apiUrl(`/api/ticket/${encodeURIComponent(value)}`),
         );
         const body = (await response.json().catch(() => null)) as
           | TicketResponse
@@ -115,7 +116,7 @@ export function TicketPage({ token = "" }: TicketPageProps) {
 
     try {
       const response = await fetch(
-        `/api/ticket/lookup?query=${encodeURIComponent(value)}`,
+        apiUrl(`/api/ticket/lookup?query=${encodeURIComponent(value)}`),
       );
       const body = (await response.json().catch(() => null)) as
         | TicketResponse

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
+import { apiUrl } from "@/lib/api";
+
 type RegistrationModalProps = {
   eventTitle: string;
   passTitle: string;
@@ -143,7 +145,7 @@ export function RegistrationModal({
     setPhase("submitting");
 
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch(apiUrl("/api/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

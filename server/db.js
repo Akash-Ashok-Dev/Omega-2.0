@@ -13,8 +13,14 @@ mkdirSync(dirname(databasePath), { recursive: true });
 
 export const db = new DatabaseSync(databasePath);
 
+const journalMode =
+  process.env.SQLITE_JOURNAL_MODE?.trim().toUpperCase() === "WAL"
+    ? "WAL"
+    : "DELETE";
+
 db.exec(`
-  PRAGMA journal_mode = WAL;
+  PRAGMA journal_mode = ${journalMode};
+  PRAGMA busy_timeout = 5000;
   PRAGMA foreign_keys = ON;
 
   CREATE TABLE IF NOT EXISTS registrations (

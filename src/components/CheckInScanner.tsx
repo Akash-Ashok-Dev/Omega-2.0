@@ -8,6 +8,7 @@ import {
 import { Html5Qrcode } from "html5-qrcode";
 
 import { EVENTS } from "@/data/site";
+import { apiUrl } from "@/lib/api";
 import {
   extractTicketToken,
   formatTicketDate,
@@ -138,7 +139,9 @@ export function CheckInScanner({
   const fetchStats = useCallback(async () => {
     try {
       const response = await fetch(
-        `/api/admin/check-in/stats?eventId=${encodeURIComponent(eventId)}`,
+        apiUrl(
+          `/api/admin/check-in/stats?eventId=${encodeURIComponent(eventId)}`,
+        ),
         { headers: { "x-admin-token": token } },
       );
       if (response.status === 401) {
@@ -200,7 +203,7 @@ export function CheckInScanner({
       };
 
       try {
-        const response = await fetch("/api/admin/check-in", {
+        const response = await fetch(apiUrl("/api/admin/check-in"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -332,7 +335,7 @@ export function CheckInScanner({
     try {
       for (const item of queue) {
         try {
-          const response = await fetch("/api/admin/check-in", {
+          const response = await fetch(apiUrl("/api/admin/check-in"), {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -486,7 +489,7 @@ export function CheckInScanner({
     try {
       const params = new URLSearchParams({ query: value, eventId });
       const response = await fetch(
-        `/api/admin/check-in/search?${params.toString()}`,
+        apiUrl(`/api/admin/check-in/search?${params.toString()}`),
         { headers: { "x-admin-token": token } },
       );
 
