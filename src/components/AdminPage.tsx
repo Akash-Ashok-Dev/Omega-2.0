@@ -24,6 +24,8 @@ type TeamMember = {
   mail: string;
   department: string;
   college: string;
+  rasId: string;
+  ieeeId: string;
 };
 
 type Registration = {
@@ -97,6 +99,8 @@ function teamMembersOf(record: Registration): TeamMember[] {
       mail: record.mail,
       department: record.department,
       college: record.college,
+      rasId: "",
+      ieeeId: "",
     },
   ];
 }
@@ -301,6 +305,12 @@ function StatusGroup({
                                   <span className="admin-team-details__meta">
                                     DEPT {member.department || "—"} · COLLEGE{" "}
                                     {member.college || "—"}
+                                    {member.rasId
+                                      ? ` · RAS ${member.rasId}`
+                                      : ""}
+                                    {member.ieeeId
+                                      ? ` · IEEE ${member.ieeeId}`
+                                      : ""}
                                   </span>
                                 </li>
                               ))}

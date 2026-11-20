@@ -47,6 +47,7 @@ const ALLOWED_EVENT_IDS = new Set(["line-follower", "maze-solver"]);
 const ALLOWED_PASS_TYPES = new Set(["RAS", "IEEE", "Non-IEEE"]);
 const PAYMENT_STATUSES = new Set(["PENDING", "SUCCESS", "FAILED"]);
 const MAX_TEAM_MEMBERS = 4;
+const MAX_MEMBERSHIP_ID_LENGTH = 100;
 
 const REGISTRATION_SELECT = `
   id, team_name, name, mobile_number, mail, department, college,
@@ -69,8 +70,9 @@ const insertRegistration = db.prepare(`
 
 const insertTeamMember = db.prepare(`
   INSERT INTO team_members (
-    id, registration_id, position, name, mobile_number, mail, department, college
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    id, registration_id, position, name, mobile_number, mail, department,
+    college, ras_id, ieee_id
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 const selectRegistration = db.prepare(`
@@ -107,7 +109,8 @@ const ticketExists = db.prepare(`
 `);
 
 const selectTeamMembers = db.prepare(`
-  SELECT id, registration_id, position, name, mobile_number, mail, department, college
+  SELECT id, registration_id, position, name, mobile_number, mail, department,
+    college, ras_id, ieee_id
   FROM team_members
   WHERE registration_id = ?
   ORDER BY position
@@ -161,6 +164,8 @@ function toPublicMember(member) {
     mail: member.mail,
     department: member.department,
     college: member.college,
+    rasId: member.ras_id ?? "",
+    ieeeId: member.ieee_id ?? "",
   };
 }
 
@@ -236,6 +241,8 @@ function normalizeMember(value) {
     mail: asString(value?.mail ?? value?.email).toLowerCase(),
     department: asString(value?.department),
     college: asString(value?.college),
+    rasId: asString(value?.rasId),
+    ieeeId: asString(value?.ieeeId),
   };
 }
 
@@ -261,6 +268,14 @@ function validateMember(member, index, errors) {
   if (!member.college || member.college.length > 255) {
     errors[`${prefix}.college`] =
       `Team member ${index + 1} college is required (max 255 characters).`;
+  }
+  if (member.rasId.length > MAX_MEMBERSHIP_ID_LENGTH) {
+    errors[`${prefix}.rasId`] =
+      `Team member ${index + 1} RAS membership ID must be at most ${MAX_MEMBERSHIP_ID_LENGTH} characters.`;
+  }
+  if (member.ieeeId.length > MAX_MEMBERSHIP_ID_LENGTH) {
+    errors[`${prefix}.ieeeId`] =
+      `Team member ${index + 1} IEEE membership ID must be at most ${MAX_MEMBERSHIP_ID_LENGTH} characters.`;
   }
 }
 
@@ -299,7 +314,9 @@ function validateRegistration(body) {
           member.mobileNumber ||
           member.mail ||
           member.department ||
-          member.college,
+          member.college ||
+          member.rasId ||
+          member.ieeeId,
       );
 
       if (index === 0 && !provided) {
@@ -313,6 +330,15 @@ function validateRegistration(body) {
       members.push({ ...member, position: index + 1 });
       validateMember(member, index, errors);
     });
+  }
+
+  if (passTitle === "RAS" && !members.some((member) => member.rasId)) {
+    errors.rasMembershipId =
+      "At least one team member must provide a RAS membership ID.";
+  }
+  if (passTitle === "IEEE" && !members.some((member) => member.ieeeId)) {
+    errors.ieeeMembershipId =
+      "At least one team member must provide an IEEE membership ID.";
   }
 
   const leader = members.find((member) => member.position === 1);
@@ -506,6 +532,8 @@ app.post("/api/register", registerRateLimit, (req, res) => {
         member.mail,
         member.department,
         member.college,
+        member.rasId,
+        member.ieeeId,
       );
     }
     db.exec("COMMIT");
@@ -734,12 +762,15 @@ app.get("/api/registrations", (req, res) => {
         OR ticket_token LIKE ? OR EXISTS (
           SELECT 1 FROM team_members tm
           WHERE tm.registration_id = registrations.id
-            AND (tm.name LIKE ? OR tm.mail LIKE ? OR tm.mobile_number LIKE ?
-                 OR tm.department LIKE ? OR tm.college LIKE ?)
-        ))`,
+             AND (tm.name LIKE ? OR tm.mail LIKE ? OR tm.mobile_number LIKE ?
+                  OR tm.department LIKE ? OR tm.college LIKE ?
+                  OR tm.ras_id LIKE ? OR tm.ieee_id LIKE ?)
+         ))`,
     );
     const like = `%${search}%`;
     params.push(
+      like,
+      like,
       like,
       like,
       like,
@@ -770,7 +801,7 @@ app.get("/api/registrations", (req, res) => {
     ? db
         .prepare(
           `SELECT id, registration_id, position, name, mobile_number, mail,
-                  department, college
+                  department, college, ras_id, ieee_id
            FROM team_members
            WHERE registration_id IN (${rows.map(() => "?").join(", ")})
            ORDER BY registration_id, position`,

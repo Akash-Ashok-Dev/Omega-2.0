@@ -29,7 +29,9 @@ type MemberField =
   | "mobileNumber"
   | "mail"
   | "department"
-  | "college";
+  | "college"
+  | "rasId"
+  | "ieeeId";
 type MemberInput = Record<MemberField, string>;
 
 const TEAM_SIZE = 4;
@@ -39,6 +41,8 @@ const EMPTY_MEMBER: MemberInput = {
   mail: "",
   department: "",
   college: "",
+  rasId: "",
+  ieeeId: "",
 };
 
 function memberHasContent(member: MemberInput) {
@@ -47,7 +51,9 @@ function memberHasContent(member: MemberInput) {
       member.mobileNumber.trim() ||
       member.mail.trim() ||
       member.department.trim() ||
-      member.college.trim(),
+      member.college.trim() ||
+      member.rasId.trim() ||
+      member.ieeeId.trim(),
   );
 }
 
@@ -69,6 +75,17 @@ export function RegistrationModal({
   const isSubmitting = phase === "submitting";
   const isComplete = phase === "success";
   const fieldsDisabled = isSubmitting || isComplete;
+  const membershipField =
+    passTitle === "RAS" ? "rasId" : passTitle === "IEEE" ? "ieeeId" : null;
+  const membershipLabel =
+    passTitle === "RAS"
+      ? "RAS membership ID"
+      : passTitle === "IEEE"
+        ? "IEEE membership ID"
+        : null;
+  const hasMembershipId =
+    !membershipField ||
+    members.some((member) => member[membershipField].trim());
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -122,6 +139,11 @@ export function RegistrationModal({
 
     setError("");
 
+    if (!hasMembershipId) {
+      setError(`At least one team member must provide a ${membershipLabel}.`);
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const payload = {
       teamName: teamName.trim(),
@@ -131,6 +153,8 @@ export function RegistrationModal({
         mail: member.mail.trim(),
         department: member.department.trim(),
         college: member.college.trim(),
+        rasId: member.rasId.trim(),
+        ieeeId: member.ieeeId.trim(),
       })),
       ambassadorCode: String(formData.get("ambassadorCode") ?? "").trim(),
       eventTitle,
@@ -267,6 +291,13 @@ export function RegistrationModal({
                   />
                 </label>
 
+                {membershipLabel && (
+                  <p className="registration-form__hint">
+                    At least one team member must provide a {membershipLabel}.
+                    Leave it blank for everyone else.
+                  </p>
+                )}
+
                 {members.map((member, index) => {
                   const isLeader = index === 0;
                   const isRequired = isLeader || memberHasContent(member);
@@ -374,6 +405,26 @@ export function RegistrationModal({
                             disabled={fieldsDisabled}
                           />
                         </label>
+                        {membershipField && membershipLabel && (
+                          <label className="registration-team-member__field--full">
+                            {membershipLabel}
+                            <input
+                              type="text"
+                              value={member[membershipField]}
+                              onChange={(event) =>
+                                updateMember(
+                                  index,
+                                  membershipField,
+                                  event.target.value,
+                                )
+                              }
+                              maxLength={100}
+                              placeholder={membershipLabel}
+                              autoComplete="off"
+                              disabled={fieldsDisabled}
+                            />
+                          </label>
+                        )}
                       </div>
                     </fieldset>
                   );

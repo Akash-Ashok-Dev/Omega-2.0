@@ -2106,6 +2106,14 @@ section {
   letter-spacing: 0.04em;
 }
 
+.registration-form__hint {
+  grid-column: 1 / -1;
+  margin: -6px 0 0;
+  color: var(--lime);
+  font: 0.72rem/1.4 "DM Mono", monospace;
+  text-align: center;
+}
+
 .registration-team-member {
   grid-column: 1 / -1;
   min-width: 0;
@@ -2154,6 +2162,10 @@ section {
 
 .registration-team-member__field--half {
   grid-column: span 3;
+}
+
+.registration-team-member__field--full {
+  grid-column: 1 / -1;
 }
 
 .registration-form__submit {
@@ -2259,7 +2271,8 @@ section {
   }
 
   .registration-team-member__field--third,
-  .registration-team-member__field--half {
+  .registration-team-member__field--half,
+  .registration-team-member__field--full {
     grid-column: auto;
   }
 

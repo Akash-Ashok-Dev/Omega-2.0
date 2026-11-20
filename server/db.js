@@ -56,6 +56,8 @@ db.exec(`
     mail TEXT NOT NULL,
     department TEXT NOT NULL DEFAULT '',
     college TEXT NOT NULL DEFAULT '',
+    ras_id TEXT NOT NULL DEFAULT '',
+    ieee_id TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE,
     UNIQUE (registration_id, position)
@@ -97,6 +99,12 @@ if (!teamMemberColumns.some((column) => column.name === "college")) {
     "ALTER TABLE team_members ADD COLUMN college TEXT NOT NULL DEFAULT ''",
   );
   addedCollege = true;
+}
+if (!teamMemberColumns.some((column) => column.name === "ras_id")) {
+  db.exec("ALTER TABLE team_members ADD COLUMN ras_id TEXT NOT NULL DEFAULT ''");
+}
+if (!teamMemberColumns.some((column) => column.name === "ieee_id")) {
+  db.exec("ALTER TABLE team_members ADD COLUMN ieee_id TEXT NOT NULL DEFAULT ''");
 }
 
 db.exec(`
