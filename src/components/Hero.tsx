@@ -1,4 +1,5 @@
 import { HERO, HERO_IMAGE } from "@/data/site";
+import { EventCountdown } from "@/components/EventCountdown";
 
 export function Hero() {
   return (
@@ -9,6 +10,7 @@ export function Hero() {
     >
       <div className="hero-bottom">
         <p>{HERO.blurb}</p>
+        <EventCountdown />
         <div className="hero-actions">
           <h1>
             {HERO.title} <span>{HERO.titleAccent}</span>

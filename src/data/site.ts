@@ -53,13 +53,16 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: "rules", index: "06", label: "RULES" },
 ] as const;
 
+export const EVENT_START = "2027-01-16T09:00:00+05:30";
+export const EVENT_END = "2027-01-17T19:30:00+05:30";
+
 export const HERO = {
   eyebrow: "OMEGA 2.0 — Robotics Fest",
   title: "OMEGA",
   titleAccent: "2.0",
   blurb:
     "Two days of gears, wires, code, and combustion. Build bots, break records, and send sparks flying.",
-  dates: "COMING SOON... / MEC, KOCHI, INDIA",
+  dates: "JAN 16—17, 2027 / MEC, KOCHI, INDIA",
   status: "SYSTEM ONLINE",
 } as const;
 
@@ -219,7 +222,7 @@ export const TIMELINE = {
   days: [
     {
       label: "DAY 01",
-      date: "Coming Soon...",
+      date: "JAN 16, 2027",
       checkpoints: [
         { time: "09:00", title: "Registration starts", detail: "Teams check in and collect their bot tags." },
         { time: "10:30", title: "Line follower competition starts", detail: "The first run enters the arena." },
@@ -229,7 +232,7 @@ export const TIMELINE = {
     },
     {
       label: "DAY 02",
-      date: "Coming Soon...",
+      date: "JAN 17, 2027",
       checkpoints: [
         { time: "09:30", title: "Pit lane opens", detail: "Final checks, repairs, and route briefing." },
         { time: "11:00", title: "Maze Solver starts", detail: "The remaining bots take the hard route." },
@@ -248,7 +251,7 @@ export const HERO_IMAGE = "/Hero Cover.jpg";
 
 export const FOOTER = {
   titleLines: ["Autobots!", "Roll out."] as const,
-  note: "© 2026 OMEGA 2.0 · Built by Akash Ashok.",
+  note: "© 2027 OMEGA 2.0 · Built by Akash Ashok.",
   contactEmail: "hello@omega2k.in",
 } as const;
 

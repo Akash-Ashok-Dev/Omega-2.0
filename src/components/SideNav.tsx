@@ -91,7 +91,7 @@ export function SideNav() {
       </nav>
 
       <div className="year">
-        2026
+        2027
         <br />
         INDIA
       </div>
