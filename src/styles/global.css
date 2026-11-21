@@ -3027,6 +3027,7 @@ a.win__desk-row:hover b {
   font: 0.72rem/1 "DM Mono", monospace;
   letter-spacing: 0.08em;
   box-shadow: 4px 4px 0 #5a4a00;
+  text-decoration: none;
   transition: 0.25s ease;
 }
 

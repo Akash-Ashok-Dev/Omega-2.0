@@ -328,7 +328,7 @@ export type Rulebook = {
   tag: string;
   title: string;
   description: string;
-  driveUrl: string;
+  fileUrl: string;
   fileName: string;
 };
 
@@ -339,8 +339,8 @@ export const RULES: readonly Rulebook[] = [
     title: "Line Follower",
     description:
       "Track specs, sensors, controller limits, lane rules, and how penalties are applied.",
-    driveUrl: "https://drive.google.com/file/d/YOUR_LINE_FOLLOWER_FILE_ID/view",
-    fileName: "Line_Follower_RuleBook.pdf",
+    fileUrl: "/RuleBook/Omega_2_Line%20Follower%20Rulebook.docx",
+    fileName: "Omega_2_Line Follower Rulebook.docx",
   },
   {
     id: "maze-solver",
@@ -348,7 +348,7 @@ export const RULES: readonly Rulebook[] = [
     title: "Maze Solver",
     description:
       "Maze dimensions, maze-solving rules, time limits, scoring, and disqualifiers.",
-    driveUrl: "https://drive.google.com/file/d/YOUR_MAZE_SOLVER_FILE_ID/view",
-    fileName: "MazeSolver_RuleBook.pdf",
+    fileUrl: "/RuleBook/Omega_2_Maze%20Solver%20Rulebook.docx",
+    fileName: "Omega_2_Maze Solver Rulebook.docx",
   },
 ] as const;

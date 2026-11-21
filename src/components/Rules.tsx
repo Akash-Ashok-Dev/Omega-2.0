@@ -1,13 +1,8 @@
-import { useState } from "react";
-
-import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { RULES } from "@/data/site";
 import { Reveal } from "@/components/Reveal";
 import { SectionHead } from "@/components/SectionHead";
 
 export function Rules() {
-  const [selectedRule, setSelectedRule] = useState<string | null>(null);
-
   return (
     <>
       <section id="rules" className="rules">
@@ -38,13 +33,13 @@ export function Rules() {
               <h3>{rule.title}</h3>
               <p>{rule.description}</p>
 
-              <button
+              <a
                 className="rule__download"
-                type="button"
-                onClick={() => setSelectedRule(rule.title)}
+                href={rule.fileUrl}
+                download={rule.fileName}
               >
-                COMING SOON <strong aria-hidden="true">↗</strong>
-              </button>
+                DOWNLOAD RULEBOOK <strong aria-hidden="true">↗</strong>
+              </a>
 
               <span className="rule__file">{rule.fileName}</span>
             </Reveal>
@@ -62,13 +57,6 @@ export function Rules() {
           */}
         </div>
       </section>
-
-      {selectedRule ? (
-        <ComingSoonModal
-          message={`${selectedRule} rules will be available soon.`}
-          onClose={() => setSelectedRule(null)}
-        />
-      ) : null}
     </>
   );
 }
